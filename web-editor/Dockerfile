@@ -9,7 +9,7 @@ RUN npm run build:examples -- --base=/ --outDir=/build \
     && cp /build/editor.html /build/index.html
 
 FROM nginxinc/nginx-unprivileged:alpine AS runtime
-ARG WEB_EDITOR_VERSION=1.2.0
+ARG WEB_EDITOR_VERSION
 ARG VCS_REF=unknown
 
 LABEL org.opencontainers.image.title="mermaid-bpmn-workbench-web-editor" \
