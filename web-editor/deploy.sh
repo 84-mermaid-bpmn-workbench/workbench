@@ -22,6 +22,7 @@ editor_version="$(jq -er '.version | select(type == "string" and length > 0)' "$
 
 build_image() {
   docker build \
+    --no-cache \
     --file "$script_dir/Dockerfile" \
     --build-arg "WEB_EDITOR_VERSION=$editor_version" \
     --tag "$image_name:$editor_version" \

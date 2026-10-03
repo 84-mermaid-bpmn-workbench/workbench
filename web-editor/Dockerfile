@@ -5,8 +5,9 @@ COPY _mermaid-bpmn-fork/package.json _mermaid-bpmn-fork/package-lock.json ./
 RUN npm ci
 
 COPY _mermaid-bpmn-fork/ ./
+COPY workbench/web-editor/prepare-site.mjs /prepare-site.mjs
 RUN npm run build:examples -- --base=/ --outDir=/build \
-    && cp /build/editor.html /build/index.html
+    && node /prepare-site.mjs
 
 FROM nginxinc/nginx-unprivileged:alpine AS runtime
 ARG WEB_EDITOR_VERSION
