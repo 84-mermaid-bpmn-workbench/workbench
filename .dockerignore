@@ -1,9 +1,0 @@
-**
-!_mermaid-bpmn-fork/
-!_mermaid-bpmn-fork/**
-!workbench/
-!workbench/web-editor/
-!workbench/web-editor/**
-**/node_modules/
-**/.git
-**/.git/**
