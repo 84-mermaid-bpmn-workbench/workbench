@@ -14,7 +14,9 @@
         }
     },
     "scripts": {
+        "build": "npm run build:node && npm run build:browser",
         "build:browser": "node .delivery/scripts/build-browser.mjs",
+        "build:node": "npx tsc",
         "lint": "eslint .",
         "check-types": "npx tsc --noEmit"
     },
