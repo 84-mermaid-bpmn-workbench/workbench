@@ -1,0 +1,39 @@
+{
+    "name": "mermaid-bpmn-cli",
+    "version": "0.1.0",
+    "description": "Render Mermaid-BPMN source to SVG locally.",
+    "type": "module",
+    "license": "MIT",
+    "scripts": {
+        "lint": "eslint .",
+        "check-types": "npx tsc --noEmit"
+    },
+    "engines": {
+        "node": ">=22.12.0"
+    },
+    "bin": {
+        "mermaid-bpmn-cli": "./dist/cli.js"
+    },
+    "exports": {
+        ".": {
+            "types": "./dist/render-svg.d.ts",
+            "import": "./dist/render-svg.js"
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "dependencies": {
+        "mermaid": "11.17.2",
+        "mermaid-bpmn": "1.2.0",
+        "puppeteer-core": "25.12.0"
+    },
+    "devDependencies": {
+        "@eslint/js": "^10.0.1",
+        "@types/node": "^26.6.4",
+        "eslint": "^10.10.0",
+        "prettier": "^3.8.4",
+        "typescript": "^5.9.3",
+        "typescript-eslint": "^8.70.0"
+    }
+}

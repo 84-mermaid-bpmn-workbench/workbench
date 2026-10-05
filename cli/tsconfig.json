@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "tsBuildInfoFile": "./.delivery/.temp/tsconfig.tsbuildinfo",
+        "target": "ES2022",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
+        "strict": true,
+        "skipLibCheck": true,
+        "incremental": true,
+        "rootDir": "./src",
+        "outDir": "./.delivery/.builds/dist",
+        "declaration": true,
+        "resolveJsonModule": true,
+        "baseUrl": ".",
+        "paths": {
+            "@src/*": ["./src/*"]
+        }
+    },
+    "include": ["./src/**/*.ts"],
+    "exclude": ["./.delivery/**", "./node_modules/**"]
+}
