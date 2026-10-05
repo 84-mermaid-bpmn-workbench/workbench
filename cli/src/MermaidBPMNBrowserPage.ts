@@ -1,5 +1,6 @@
 import mermaid from 'mermaid';
-import bpmn from 'mermaid-bpmn';
+import bpmn, { registerIconPacks } from 'mermaid-bpmn';
+import { localMermaidBPMNIconPacks } from './icon-packs.js';
 
 declare global {
     interface Window {
@@ -36,6 +37,7 @@ export class MermaidBPMNBrowserPage {
 
     private async initialize(): Promise<void> {
         await mermaid.registerExternalDiagrams([bpmn]);
+        registerIconPacks(localMermaidBPMNIconPacks);
         mermaid.initialize({ startOnLoad: false });
     }
 }
