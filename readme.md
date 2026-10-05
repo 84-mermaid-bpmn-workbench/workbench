@@ -1,6 +1,6 @@
 # Mermaid BPMN Workbench
 
-`mermaid-bpmn-workbench` makes Mermaid-BPMN practical for local and self-hosted BPMN-as-code workflows. It builds on the great [`mermaid-bpmn`](https://github.com/derari/mermaid-bpmn) package that does the heavy lifting, and keeps diagrams as local source that can be edited, previewed, and generated as SVG without an external SaaS service.
+`mermaid-bpmn-workbench` makes Mermaid-BPMN practical for local and self-hosted BPMN-as-code workflows. It builds on the great [`mermaid-bpmn`](https://github.com/derari/mermaid-bpmn) package that does the heavy lifting. The workbench keeps diagrams as local source that can be edited, previewed, and generated as SVG without an external SaaS service, as well as provides the BPMN editor as a Docker container convenient for self-hosting.
 
 ## Workbench elements
 
