@@ -4,24 +4,22 @@ import { localMermaidBPMNIconPacks } from './icon-packs.js';
 
 declare global {
     interface Window {
-        mermaidBPMNBrowserPage: MermaidBPMNBrowserPage;
+        browserPageRenderer: BrowserPageRenderer;
     }
 }
 
 /**
+ * BrowserPageController sends Mermaid-BPMN source to this Chromium page because Mermaid-BPMN requires browser DOM and SVG measurement behavior.
  *
- * This class exists to keep browser-page registration and rendering separate from the Node-side 
- * browser lifecycle. Its responsibility is to prepare Mermaid-BPMN once and render each supplied
- * source string after that preparation completes.
+ * This class exists to keep the actual Mermaid rendering separate from the Node-side browser-page control lifecycle.
+ * Its responsibility is to prepare Mermaid-BPMN once and render each supplied Mermaid-BPMN source string.
  *
- * @description Registers Mermaid-BPMN in the browser page and renders Mermaid-BPMN source after 
- * the registration and Mermaid initialization complete.
- * @requires Mermaid-BPMN must be registered in the same browser page that calls Mermaid rendering.
+ * @description Registers Mermaid-BPMN and local icon packs, then renders Mermaid-BPMN source to SVG in the browser page.
  */
-export class MermaidBPMNBrowserPage {
+export class BrowserPageRenderer {
     private initialization: Promise<void> | null = null;
 
-    public async renderSvg(source: string): Promise<string> {
+    public async renderFromSource(source: string): Promise<string> {
         await this.getInitialization();
 
         const renderId = `mermaid-bpmn-cli-${crypto.randomUUID()}`;
@@ -42,4 +40,4 @@ export class MermaidBPMNBrowserPage {
     }
 }
 
-window.mermaidBPMNBrowserPage = new MermaidBPMNBrowserPage();
+window.browserPageRenderer = new BrowserPageRenderer();
