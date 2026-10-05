@@ -4,13 +4,6 @@
     "description": "Render Mermaid-BPMN source to SVG locally.",
     "type": "module",
     "license": "MIT",
-    "scripts": {
-        "lint": "eslint .",
-        "check-types": "npx tsc --noEmit"
-    },
-    "engines": {
-        "node": ">=22.12.0"
-    },
     "bin": {
         "mermaid-bpmn-cli": "./dist/cli.js"
     },
@@ -19,6 +12,13 @@
             "types": "./dist/render-svg.d.ts",
             "import": "./dist/render-svg.js"
         }
+    },
+    "scripts": {
+        "lint": "eslint .",
+        "check-types": "npx tsc --noEmit"
+    },
+    "engines": {
+        "node": ">=22.12.0"
     },
     "files": [
         "dist"
