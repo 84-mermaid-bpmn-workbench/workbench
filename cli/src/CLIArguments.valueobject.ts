@@ -1,16 +1,16 @@
-import { Command } from 'commander';
+import { Command, Option } from 'commander';
 import { extname } from 'node:path';
 
 type TSelfPOJO = {
     inputPath: string;
     outputPath: string;
-    browserPath: string | null;
+    browserPath: string;
 };
 
 type TCommanderOptions = {
     input?: string;
     output?: string;
-    browser?: string;
+    browser: string;
 };
 
 /**
@@ -41,7 +41,7 @@ export class CLIArgumentsVO {
 
     private readonly outputPath: string;
 
-    private readonly browserPath: string | null;
+    private readonly browserPath: string;
 
     private constructor(self: TSelfPOJO) {
         this.inputPath = self.inputPath;
@@ -57,7 +57,7 @@ export class CLIArgumentsVO {
         return this.outputPath;
     }
 
-    public get browser(): string | null {
+    public get browser(): string {
         return this.browserPath;
     }
 
@@ -66,23 +66,14 @@ export class CLIArgumentsVO {
         command.parse(argumentsList, { from: 'user' });
 
         const options = command.opts<TCommanderOptions>();
-        const positionalArguments = command.args;
-
-        if (options.input !== undefined && positionalArguments.length > 0) {
-            throw new Error('Specify the input source with either --input or one positional argument, not both.');
-        }
-
-        const inputPath = options.input ?? positionalArguments[0];
-
-        if (inputPath === undefined) {
-            throw new Error('Specify an input source with --input <path> or one positional argument.');
-        }
+        const inputPath = this.resolveInputPath(command, options, command.args);
 
         const outputPath = options.output ?? this.deriveOutputPath(inputPath);
+
         const self: TSelfPOJO = {
             inputPath,
             outputPath,
-            browserPath: options.browser ?? null
+            browserPath: options.browser
         };
         return new CLIArgumentsVO(self);
     }
@@ -93,12 +84,33 @@ export class CLIArgumentsVO {
             .argument('[input]')
             .option('-i, --input <path>')
             .option('-o, --output <path>')
-            .option('--browser <path>')
+            .addOption(
+                new Option('--browser <path>')
+                    .env('MERMAID_BPMN_CLI_BROWSER_PATH')
+                    .makeOptionMandatory()
+            )
             .configureOutput({
                 writeOut: () => undefined,
                 writeErr: () => undefined
             })
             .exitOverride();
+    }
+
+    private static resolveInputPath(command: Command, options: TCommanderOptions, positionalArguments: string[]): string {
+        const hasConflictingInputSources = (): boolean => options.input !== undefined && positionalArguments.length > 0;
+        const isInputPathMissing = (inputPath: string | undefined): inputPath is undefined => inputPath === undefined;
+
+        if (hasConflictingInputSources()) {
+            command.error('Specify the input source with either --input or one positional argument, not both.');
+        }
+
+        const inputPath = options.input ?? positionalArguments[0];
+
+        if (isInputPathMissing(inputPath)) {
+            command.error('Specify an input source with --input <path> or one positional argument.');
+        }
+
+        return inputPath;
     }
 
     private static deriveOutputPath(inputPath: string): string {
