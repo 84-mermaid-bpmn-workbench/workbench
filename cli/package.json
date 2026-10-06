@@ -15,7 +15,9 @@
     },
     "scripts": {
         "test:foundation": "npm run vitest",
-        "vitest": "vitest run --config tests/foundation/.ancillary/config/vitest.config.ts",
+        "vitest": "vitest run --config tests/.ancillary/config/vitest.config.ts",
+        "test:e2e": "npm run build && npm run vitest:e2e",
+        "vitest:e2e": "vitest run --mode e2e --config tests/.ancillary/config/vitest.config.ts",
         "check-types": "npx tsc --noEmit",
         "lint": "eslint .",
         "build": "node .delivery/scripts/clean-build.mjs && npm run build:node && npm run build:browser",

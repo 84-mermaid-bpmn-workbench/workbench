@@ -13,7 +13,7 @@ await mkdir(rendererOutputDirectory, { recursive: true });
 await build({
     bundle: true,
     entryPoints: [browserEntryPoint],
-    format: 'esm',
+    format: 'iife',
     outdir: outputDirectory,
     platform: 'browser',
     target: 'es2022',

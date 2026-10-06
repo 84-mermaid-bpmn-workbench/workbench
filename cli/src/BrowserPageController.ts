@@ -38,7 +38,7 @@ export class BrowserPageController {
             const page = await browser.newPage();
             await page.goto(this.rendererPageURL.href, { waitUntil: 'load' });
 
-            return page.evaluate(async (diagramSource: string): Promise<string> => {
+            return await page.evaluate(async (diagramSource: string): Promise<string> => {
                 return window.browserPageRenderer.renderFromSource(diagramSource);
             }, source);
         } finally {

@@ -14,9 +14,9 @@
         "paths": {
             "@src/*": ["./src/*"],
             "@tests/*": ["./tests/*"],
-            "@fixtures/*": ["./tests/foundation/.ancillary/fixtures/*"]
+            "@fixtures/*": ["tests/.ancillary/fixtures/*"]
         }
     },
-    "include": ["./src", "./eslint.config.mjs", "*.d.ts", "./tests/**/*.ts", "./tests/foundation/.ancillary/**/*.*"],
+    "include": ["./src", "./eslint.config.mjs", "*.d.ts", "./tests/**/*.ts", "tests/.ancillary/**/*.*"],
     "exclude": ["./.delivery/**", "./node_modules/**", ".coverage"]
 }
