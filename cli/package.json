@@ -5,12 +5,12 @@
     "type": "module",
     "license": "MIT",
     "bin": {
-        "mermaid-bpmn-cli": "./.delivery/.builds/dist/src/cli.js"
+        "mermaid-bpmn-cli": "./.delivery/.builds/dist/cli.js"
     },
     "exports": {
         ".": {
-            "types": "./.delivery/.builds/dist/src/index.d.ts",
-            "import": "./.delivery/.builds/dist/src/index.js"
+            "types": "./.delivery/.builds/dist/index.d.ts",
+            "import": "./.delivery/.builds/dist/index.js"
         }
     },
     "scripts": {
@@ -18,9 +18,9 @@
         "vitest": "vitest run --config tests/foundation/.ancillary/config/vitest.config.ts",
         "check-types": "npx tsc --noEmit",
         "lint": "eslint .",
-        "build": "npm run build:node && npm run build:browser",
+        "build": "node .delivery/scripts/clean-build.mjs && npm run build:node && npm run build:browser",
         "build:browser": "node .delivery/scripts/build-browser.mjs",
-        "build:node": "npx tsc"
+        "build:node": "npx tsc --build --force .delivery/configuration/tsconfig.json"
     },
     "engines": {
         "node": ">=22.12.0"

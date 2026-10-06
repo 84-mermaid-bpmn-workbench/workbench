@@ -2,12 +2,6 @@ import mermaid from 'mermaid';
 import bpmn, { registerIconPacks } from 'mermaid-bpmn';
 import { localMermaidBPMNIconPacks } from './icon-packs.js';
 
-declare global {
-    interface Window {
-        browserPageRenderer: BrowserPageRenderer;
-    }
-}
-
 /**
  * BrowserPageController sends Mermaid-BPMN source to this Chromium page because Mermaid-BPMN requires browser DOM and SVG measurement behavior.
  *

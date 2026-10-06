@@ -1,0 +1,12 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "tsBuildInfoFile": "../.temp/tsconfig.tsbuildinfo",
+        "composite": true,
+        "rootDir": "../../src",
+        "outDir": "../.builds/dist",
+        "declaration": true
+    },
+    "include": ["../../src", "../../*.d.ts"],
+    "exclude": ["../../.delivery/**", "../../node_modules/**", "../../src/BrowserPageRenderer.ts"]
+}
