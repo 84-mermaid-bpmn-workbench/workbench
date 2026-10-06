@@ -7,14 +7,16 @@
         "strict": true,
         "skipLibCheck": true,
         "incremental": true,
-        "rootDir": "./src",
+        "rootDir": ".",
         "outDir": "./.delivery/.builds/dist",
         "declaration": true,
         "resolveJsonModule": true,
         "paths": {
-            "@src/*": ["./src/*"]
+            "@src/*": ["./src/*"],
+            "@tests/*": ["./tests/*"],
+            "@fixtures/*": ["./tests/foundation/.ancillary/fixtures/*"]
         }
     },
-    "include": ["./src/**/*.ts"],
-    "exclude": ["./.delivery/**", "./node_modules/**"]
+    "include": ["./src", "./eslint.config.mjs", "*.d.ts", "./tests/**/*.ts", "./tests/foundation/.ancillary/**/*.*"],
+    "exclude": ["./.delivery/**", "./node_modules/**", ".coverage"]
 }
