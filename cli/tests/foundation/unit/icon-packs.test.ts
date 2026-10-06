@@ -6,7 +6,7 @@ describe('[unit] localMermaidBPMNIconPacks Test', () => {
     it('loaders: Should load every supported local Iconify pack', async () => {
         const actual = await Promise.all(localMermaidBPMNIconPacks.map(async (iconPack) => ({
             name: iconPack.name,
-            iconSet: await iconPack.loader()
+            iconSet: await iconPack.loader!()
         })));
 
         expect(actual.map((iconPack) => iconPack.name)).toEqual(iconPacksFixture.names);

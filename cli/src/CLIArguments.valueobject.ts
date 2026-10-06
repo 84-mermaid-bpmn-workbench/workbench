@@ -80,19 +80,24 @@ export class CLIArgumentsVO {
 
     private static createCommand(): Command {
         return new Command()
+            .name('mermaid-bpmn-cli')
+            .description('Render Mermaid-BPMN source to SVG.')
+            .usage('[options] [input]')
             .allowExcessArguments(false)
-            .argument('[input]')
-            .option('-i, --input <path>')
-            .option('-o, --output <path>')
+            .argument('[input]', 'Mermaid-BPMN source file.')
+            .option('-i, --input <path>', 'Read Mermaid-BPMN source from a file.')
+            .option('-o, --output <path>', 'Write SVG to a file.')
             .addOption(
-                new Option('--browser <path>')
+                new Option('--browser <path>', 'Path to the Chrome or Chromium executable.')
                     .env('MERMAID_BPMN_CLI_BROWSER_PATH')
                     .makeOptionMandatory()
             )
-            .configureOutput({
-                writeOut: () => undefined,
-                writeErr: () => undefined
-            })
+            .helpOption('-h, --help', 'Display command help.')
+            .addHelpText('after', `
+Examples:
+  mermaid-bpmn-cli --browser <chrome-or-chromium-path> -i process.mmd -o process.svg
+  MERMAID_BPMN_CLI_BROWSER_PATH=<chrome-or-chromium-path> mermaid-bpmn-cli process.mmd
+`)
             .exitOverride();
     }
 

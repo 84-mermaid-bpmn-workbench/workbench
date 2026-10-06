@@ -5,12 +5,12 @@
     "type": "module",
     "license": "MIT",
     "bin": {
-        "mermaid-bpmn-cli": "./dist/cli.js"
+        "mermaid-bpmn-cli": "./.delivery/.builds/dist/src/cli.js"
     },
     "exports": {
         ".": {
-            "types": "./dist/render-svg.d.ts",
-            "import": "./dist/render-svg.js"
+            "types": "./.delivery/.builds/dist/src/index.d.ts",
+            "import": "./.delivery/.builds/dist/src/index.js"
         }
     },
     "scripts": {
@@ -26,7 +26,7 @@
         "node": ">=22.12.0"
     },
     "files": [
-        "dist"
+        ".delivery/.builds/dist"
     ],
     "dependencies": {
         "@iconify-json/devicon-plain": "1.2.61",

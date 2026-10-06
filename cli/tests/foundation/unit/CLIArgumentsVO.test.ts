@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cliArgumentsFixture } from '@fixtures/index.js';
 import { CLIArgumentsVO } from '@src/CLIArguments.valueobject.js';
 
@@ -6,6 +6,8 @@ describe('[unit] CLIArgumentsVO Test', () => {
     const originalBrowserExecutablePath = process.env[cliArgumentsFixture.browserEnvironmentVariableName];
 
     afterEach(() => {
+        vi.restoreAllMocks();
+
         if (originalBrowserExecutablePath === undefined) {
             delete process.env[cliArgumentsFixture.browserEnvironmentVariableName];
             return;
@@ -70,7 +72,20 @@ describe('[unit] CLIArgumentsVO Test', () => {
         expect(() => CLIArgumentsVO.create([cliArgumentsFixture.inputPath])).toThrow();
     });
 
-    it('+create() [failure] #4: Should reject the help request after displaying help', () => {
+    it('+create() [failure] #4: Should display help before the successful Commander exit', () => {
+        const output: string[] = [];
+        const stdoutWrite = vi.spyOn(process.stdout, 'write').mockImplementation((chunk) => {
+            output.push(String(chunk));
+            return true;
+        });
+
         expect(() => CLIArgumentsVO.create(['--help'])).toThrow();
+
+        expect(stdoutWrite).toHaveBeenCalled();
+        expect(output.join('')).toContain(cliArgumentsFixture.helpUsage);
+
+        for (const helpExample of cliArgumentsFixture.helpExamples) {
+            expect(output.join('')).toContain(helpExample);
+        }
     });
 });
