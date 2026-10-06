@@ -25,7 +25,8 @@ type TCommanderOptions = {
  * The CLI accepts one Mermaid-BPMN source file and a small, explicit MVP option set.
  * One input path is mandatory. Supply it either with `-i, --input <path>` or as one
  * positional argument, but not both. `-o, --output <path>` is optional; without it,
- * the CLI replaces the input extension with `.svg`.
+ * the CLI replaces the input extension with `.svg`. An explicit output path must use
+ * the `.svg` extension.
  *
  * A browser executable path is mandatory for rendering. Supply it with the optional
  * `--browser <path>` option, or set `MERMAID_BPMN_CLI_BROWSER_PATH`; the option takes
@@ -86,7 +87,10 @@ export class CLIArgumentsVO {
             .allowExcessArguments(false)
             .argument('[input]', 'Mermaid-BPMN source file.')
             .option('-i, --input <path>', 'Read Mermaid-BPMN source from a file.')
-            .option('-o, --output <path>', 'Write SVG to a file.')
+            .addOption(
+                new Option('-o, --output <path>', 'Write SVG to a .svg file.')
+                    .argParser((outputPath: string): string => this.parseSVGOutputPath(outputPath))
+            )
             .addOption(
                 new Option('--browser <path>', 'Path to the Chrome or Chromium executable.')
                     .env('MERMAID_BPMN_CLI_BROWSER_PATH')
@@ -99,6 +103,16 @@ Examples:
   MERMAID_BPMN_CLI_BROWSER_PATH=<chrome-or-chromium-path> mermaid-bpmn-cli process.mmd
 `)
             .exitOverride();
+    }
+
+    private static parseSVGOutputPath(outputPath: string): string {
+        const hasSVGExtension = (): boolean => extname(outputPath).toLowerCase() === '.svg';
+
+        if (!hasSVGExtension()) {
+            throw new Error('Specify an output path with a .svg extension.');
+        }
+
+        return outputPath;
     }
 
     private static resolveInputPath(command: Command, options: TCommanderOptions, positionalArguments: string[]): string {
