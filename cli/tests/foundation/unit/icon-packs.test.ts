@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { iconPacksFixture } from '@fixtures/index.js';
+import { iconPacksFixture } from '@tests/.ancillary/fixtures/index.js';
 import { localMermaidBPMNIconPacks } from '@src/icon-packs.js';
 
 describe('[unit] localMermaidBPMNIconPacks Test', () => {

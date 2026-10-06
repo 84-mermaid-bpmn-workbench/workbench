@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { cliApplicationFixture } from '@fixtures/index.js';
+import { cliApplicationFixture } from '@tests/.ancillary/fixtures/index.js';
 import { CLIApplication } from '@src/CLIApplication.js';
 
 const { mockReadFile, mockRenderSvg, mockWriteFile } = vi.hoisted(() => ({

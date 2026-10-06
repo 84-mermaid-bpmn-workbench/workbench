@@ -1,6 +1,6 @@
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { browserExecutablePathFixture } from '@fixtures/index.js';
+import { browserExecutablePathFixture } from '@tests/.ancillary/fixtures/index.js';
 import { BrowserExecutablePathVO } from '@src/BrowserExecutablePath.valueobject.js';
 
 describe('[unit] BrowserExecutablePathVO Test', () => {

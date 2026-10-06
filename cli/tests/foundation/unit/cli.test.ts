@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CommanderError } from 'commander';
-import { cliApplicationFixture } from '@fixtures/index.js';
+import { cliApplicationFixture } from '@tests/.ancillary/fixtures/index.js';
 import { runCLI } from '@src/cli.js';
 
 const { mockCLIApplication, mockRun } = vi.hoisted(() => {

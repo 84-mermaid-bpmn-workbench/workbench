@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cliArgumentsFixture } from '@fixtures/index.js';
+import { cliArgumentsFixture } from '@tests/.ancillary/fixtures/index.js';
 import { CLIArgumentsVO } from '@src/CLIArguments.valueobject.js';
 
 describe('[unit] CLIArgumentsVO Test', () => {
@@ -87,5 +87,16 @@ describe('[unit] CLIArgumentsVO Test', () => {
         for (const helpExample of cliArgumentsFixture.helpExamples) {
             expect(output.join('')).toContain(helpExample);
         }
+    });
+
+    it('+create() [failure] #5: Should reject an output path without an SVG extension', () => {
+        expect(() => CLIArgumentsVO.create([
+            '--browser',
+            cliArgumentsFixture.browserExecutablePath,
+            '--input',
+            cliArgumentsFixture.inputPath,
+            '--output',
+            cliArgumentsFixture.invalidOutputPath
+        ])).toThrow(cliArgumentsFixture.invalidOutputError);
     });
 });

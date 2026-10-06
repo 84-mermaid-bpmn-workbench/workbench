@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { browserPageRendererFixture } from '@fixtures/index.js';
+import { browserPageRendererFixture } from '@tests/.ancillary/fixtures/index.js';
 
 const { mockBPMN, mockMermaid, mockRegisterIconPacks } = vi.hoisted(() => ({
     mockBPMN: { id: 'bpmn' },

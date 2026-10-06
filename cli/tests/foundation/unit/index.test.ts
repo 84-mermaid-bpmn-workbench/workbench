@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { indexFixture } from '@fixtures/index.js';
+import { indexFixture } from '@tests/.ancillary/fixtures/index.js';
 
 const { mockBrowserExecutablePath, mockBrowserExecutablePathCreate, mockBrowserPageControllerCreate, mockRenderSVG } = vi.hoisted(() => ({
     mockBrowserExecutablePath: { path: '' },

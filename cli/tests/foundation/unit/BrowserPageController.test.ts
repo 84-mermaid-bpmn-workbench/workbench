@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { browserPageControllerFixture } from '@fixtures/index.js';
+import { browserPageControllerFixture } from '@tests/.ancillary/fixtures/index.js';
 import { BrowserExecutablePathVO } from '@src/BrowserExecutablePath.valueobject.js';
 import { BrowserPageController } from '@src/BrowserPageController.js';
 
