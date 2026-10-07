@@ -73,8 +73,35 @@ jobs:
                   username: ${{ steps.release.outputs.dockerhub_username }}
                   password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-            - name: Publish tested image
-              run: docker push ${{ steps.release.outputs.image }}:${{ steps.release.outputs.version }}
+            - name: Generate image metadata
+              id: image_metadata
+              uses: docker/metadata-action@v6
+              with:
+                  images: ${{ steps.release.outputs.image }}
+                  tags: |
+                      type=raw,value=${{ steps.release.outputs.version }}
+                  labels: |
+                      org.opencontainers.image.source=https://github.com/84-mermaid-bpmn-workbench/workbench
+                      org.opencontainers.image.revision=${{ github.sha }}
+                      org.opencontainers.image.version=${{ steps.release.outputs.version }}
+                      org.opencontainers.image.documentation=https://github.com/84-mermaid-bpmn-workbench/workbench/blob/${{ github.sha }}/web-editor/Dockerfile
+
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v4
+
+            - name: Publish tested image with provenance
+              uses: docker/build-push-action@v7
+              with:
+                  context: delivery
+                  file: delivery/workbench/web-editor/Dockerfile
+                  push: true
+                  no-cache: true
+                  provenance: mode=min
+                  tags: ${{ steps.image_metadata.outputs.tags }}
+                  labels: ${{ steps.image_metadata.outputs.labels }}
+                  build-args: |
+                      WEB_EDITOR_VERSION=${{ steps.release.outputs.version }}
+                      WEB_EDITOR_REVISION=${{ github.sha }}
 
             - name: Tag published release
               working-directory: delivery/workbench
