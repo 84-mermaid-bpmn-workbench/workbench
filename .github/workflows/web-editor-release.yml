@@ -89,3 +89,17 @@ jobs:
                   git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
                   git tag --annotate "$RELEASE_TAG" --message "Web editor $RELEASE_TAG"
                   git push origin "$RELEASE_TAG"
+
+            - name: Merge release into master
+              working-directory: delivery/workbench
+              run: |
+                  git fetch origin master
+                  if ! git merge-base --is-ancestor origin/master HEAD; then
+                      message='The image and tag were published, but master has independent commits and cannot fast-forward to this release.'
+                      echo "::error title=Cannot fast-forward master::$message"
+                      echo '## Release published; master not updated' >> "$GITHUB_STEP_SUMMARY"
+                      echo "$message" >> "$GITHUB_STEP_SUMMARY"
+                      exit 1
+                  fi
+                  git push origin HEAD:master
+                  echo '## Release published and merged into master' >> "$GITHUB_STEP_SUMMARY"

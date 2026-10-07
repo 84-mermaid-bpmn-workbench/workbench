@@ -44,7 +44,7 @@ The command requires the expected release branch, at least one change under `web
 
 ## GitHub Actions publication
 
-Pushing `release/web-editor/*` runs the GitHub Actions workflow. It checks out the fork revision recorded in `release.json`, builds and smoke-tests the image, pushes the tested image to Docker Hub, and then creates the `web-editor/v<version>` Git tag.
+Pushing `release/web-editor/*` runs the GitHub Actions workflow. It checks out the fork revision recorded in `release.json`, builds and smoke-tests the image, pushes the tested image to Docker Hub, creates the `web-editor/v<version>` Git tag, and fast-forwards `master` to the release commit. If `master` has independent commits, the workflow reports that it cannot fast-forward and does not update `master`.
 
 Configure the `DOCKERHUB_TOKEN` repository secret in GitHub with a Docker Hub access token that can push `valentineshidev/mermaid-bpmn-workbench-web-editor`.
 
