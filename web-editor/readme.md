@@ -6,13 +6,13 @@
 
 ## Build and start
 
-The deployment script reads the image repository from `workbench/web-editor/.env` and the image version from `workbench/web-editor/VERSION`. It uses both values for the image tag and uses the version for the OCI version label. Each build uses `--no-cache`. From the workspace root in WSL, build the image with:
+The deployment script reads the image repository from `workbench/web-editor/.env` and the release metadata from `workbench/web-editor/release.json`. It uses the release version for the image tag and OCI version label. Each build uses `--no-cache`. From the workspace root in WSL, build the image with:
 
 ```bash
 bash workbench/web-editor/deploy.sh build
 ```
 
-The resulting image is `<WEB_EDITOR_IMAGE>:<version from VERSION>`.
+The resulting image is `<WEB_EDITOR_IMAGE>:<version from release.json>`.
 
 ## Docker smoke E2E test
 
@@ -32,7 +32,7 @@ From `workbench/web-editor/`, prepare the release branch and image with:
 npm run release:prepare
 ```
 
-The command removes the previous smoke-test result, creates or checks out `release/web-editor/<version from VERSION>`, builds the image, and prints the required smoke-test command.
+The command removes the previous smoke-test result, creates or checks out `release/web-editor/<version from release.json>`, builds the image, and prints the required smoke-test command.
 
 After the smoke test has written a green matching `release-verification.json`, publish the release branch with:
 
@@ -40,7 +40,7 @@ After the smoke test has written a green matching `release-verification.json`, p
 npm run release:publish
 ```
 
-The command requires the expected release branch and a green smoke result created after the prepared image build. It then asks for `A` or `C`. On `A`, it stages only `web-editor`, commits `release(web-editor): <version from VERSION>`, and pushes the branch to `origin`.
+The command requires the expected release branch, at least one change under `web-editor`, and a green smoke result created after the prepared image build. It then asks for `A` or `C`. On `A`, it stages all non-ignored working-tree changes, commits `release(web-editor): <version from release.json>`, and pushes the branch to `origin`.
 
 To build the image and start the Compose service in one step, run:
 

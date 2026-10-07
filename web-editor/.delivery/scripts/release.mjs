@@ -11,7 +11,7 @@ const scriptDirectory = dirname(fileURLToPath(import.meta.url));
 const editorDirectory = resolve(scriptDirectory, '../..');
 const workbenchRoot = resolve(editorDirectory, '..');
 const workspaceRoot = resolve(workbenchRoot, '..');
-const versionPath = resolve(editorDirectory, 'VERSION');
+const releasePath = resolve(editorDirectory, 'release.json');
 const releaseVerificationPath = resolve(editorDirectory, 'tests/.temp/release-verification.json');
 const deployScriptPath = resolve(editorDirectory, 'deploy.sh');
 const action = process.argv[2];
@@ -19,9 +19,12 @@ let version;
 let releaseBranch;
 
 try {
-    version = (await readFile(versionPath, 'utf8')).trim();
-    if (version.length === 0) {
-        throw new Error(`Editor version file is empty: ${versionPath}`);
+    const release = JSON.parse(await readFile(releasePath, 'utf8'));
+    version = release.version;
+    const hasReleaseMetadata = typeof version === 'string' && version.length > 0
+        && typeof release.mermaid_bpmn_fork_revision === 'string' && release.mermaid_bpmn_fork_revision.length > 0;
+    if (!hasReleaseMetadata) {
+        throw new Error(`Editor release file is invalid: ${releasePath}`);
     }
 
     releaseBranch = `release/web-editor/${version}`;
@@ -61,7 +64,7 @@ async function prepareRelease() {
 async function publishRelease() {
     await ensureCurrentBranch();
     await ensureGreenReleaseVerification();
-    await ensureOnlyWebEditorChanges();
+    await ensureWebEditorChanges();
 
     const accepted = await confirmRelease();
     if (!accepted) {
@@ -69,7 +72,7 @@ async function publishRelease() {
         return;
     }
 
-    await runCommand('git', ['add', '--', 'web-editor'], workbenchRoot);
+    await runCommand('git', ['add', '--all'], workbenchRoot);
     await runCommand('git', ['commit', '--message', `release(web-editor): ${version}`], workbenchRoot);
     await runCommand('git', ['push', '--set-upstream', 'origin', releaseBranch], workbenchRoot);
 }
@@ -99,16 +102,12 @@ async function ensureCurrentBranch() {
     }
 }
 
-async function ensureOnlyWebEditorChanges() {
+async function ensureWebEditorChanges() {
     const changedPaths = await getChangedPaths();
-    const hasOnlyWebEditorChanges = changedPaths.every((path) => path.startsWith('web-editor/'));
+    const hasWebEditorChanges = changedPaths.some((path) => path.startsWith('web-editor/'));
 
-    if (!hasOnlyWebEditorChanges) {
-        throw new Error('Release publishing accepts changes only under workbench/web-editor.');
-    }
-
-    if (changedPaths.length === 0) {
-        throw new Error('No web-editor changes are available for the release commit.');
+    if (!hasWebEditorChanges) {
+        throw new Error('Release publishing requires at least one change under workbench/web-editor.');
     }
 }
 

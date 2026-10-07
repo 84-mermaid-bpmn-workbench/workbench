@@ -1,0 +1,6 @@
+# Normalize text files to LF in the repository and in the working tree.
+* text=auto eol=lf
+
+# Files with a shebang or run on Linux must keep LF line endings.
+cli/src/cli.ts text eol=lf
+*.sh text eol=lf

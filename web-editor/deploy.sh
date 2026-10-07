@@ -3,13 +3,13 @@ set -euo pipefail
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 workspace_root="$(cd -- "$script_dir/../.." && pwd)"
-version_file="$script_dir/VERSION"
+release_file="$script_dir/release.json"
 environment_file="$script_dir/.env"
 compose_file="$script_dir/compose.yaml"
 action="${1:-}"
 
-if [[ ! -f "$version_file" ]]; then
-  printf 'Error: editor version file not found: %s\n' "$version_file" >&2
+if [[ ! -f "$release_file" ]]; then
+  printf 'Error: editor release file not found: %s\n' "$release_file" >&2
   exit 1
 fi
 
@@ -18,11 +18,17 @@ if [[ ! -f "$environment_file" ]]; then
   exit 1
 fi
 
-editor_version="$(tr -d '\r\n' < "$version_file")"
-if [[ -z "$editor_version" ]]; then
-  printf 'Error: editor version file is empty: %s\n' "$version_file" >&2
-  exit 1
-fi
+editor_version="$(node --eval '
+const { readFileSync } = require("node:fs");
+const release = JSON.parse(readFileSync(process.argv[1], "utf8"));
+if (typeof release.version !== "string" || release.version.length === 0) {
+  throw new Error("release.json must contain a non-empty version.");
+}
+if (typeof release.mermaid_bpmn_fork_revision !== "string" || release.mermaid_bpmn_fork_revision.length === 0) {
+  throw new Error("release.json must contain a non-empty mermaid_bpmn_fork_revision.");
+}
+console.log(release.version);
+' "$release_file")"
 
 set -a
 . "$environment_file"
