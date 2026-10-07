@@ -3,6 +3,7 @@
     "private": true,
     "type": "module",
     "scripts": {
+        "release:ci-prepare": "node .delivery/scripts/release.mjs ci-prepare",
         "release:prepare": "node .delivery/scripts/release.mjs prepare",
         "release:publish": "node .delivery/scripts/release.mjs publish",
         "test:smoke": "node tests/runDockerSmokeE2E.mjs"

@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { CommanderError } from 'commander';
 import { CLIApplication } from './CLIApplication.js';
 

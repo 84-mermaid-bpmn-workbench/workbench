@@ -1,0 +1,105 @@
+name: Publish web editor image
+
+on:
+    push:
+        branches:
+            - 'release/web-editor/*'
+
+permissions:
+    contents: write
+
+jobs:
+    publish:
+        name: Build, test, and publish web editor image
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Check out workbench
+              uses: actions/checkout@v6
+              with:
+                  fetch-depth: 0
+                  path: delivery/workbench
+
+            - name: Read release metadata
+              id: release
+              working-directory: delivery/workbench
+              run: |
+                  node --input-type=module --eval '
+                      import { readFileSync } from "node:fs";
+                      const release = JSON.parse(readFileSync("web-editor/release.json", "utf8"));
+                      const environment = readFileSync("web-editor/.env", "utf8");
+                      const image = environment.split(/\r?\n/)
+                          .find((line) => line.startsWith("WEB_EDITOR_IMAGE="))
+                          ?.slice("WEB_EDITOR_IMAGE=".length);
+                      if (typeof release.version !== "string" || typeof release.mermaid_bpmn_fork_revision !== "string" || !image) {
+                          throw new Error("Web editor release metadata is invalid.");
+                      }
+                      console.log(`version=${release.version}`);
+                      console.log(`fork_revision=${release.mermaid_bpmn_fork_revision}`);
+                      console.log(`image=${image}`);
+                      console.log(`dockerhub_username=${image.split("/")[0]}`);
+                  ' >> "$GITHUB_OUTPUT"
+
+            - name: Check out pinned Mermaid-BPMN fork
+              uses: actions/checkout@v6
+              with:
+                  repository: 84-mermaid-bpmn-workbench/mermaid-bpmn-fork
+                  ref: ${{ steps.release.outputs.fork_revision }}
+                  path: delivery/_mermaid-bpmn-fork
+
+            - name: Build web editor image
+              working-directory: delivery/workbench/web-editor
+              run: bash deploy.sh build
+
+            - name: Prepare smoke E2E verification
+              working-directory: delivery/workbench/web-editor
+              run: npm run release:ci-prepare
+
+            - name: Run Docker smoke E2E test
+              working-directory: delivery/workbench/web-editor
+              run: npm run test:smoke
+
+            - name: Upload smoke E2E result
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: web-editor-release-verification
+                  path: delivery/workbench/web-editor/tests/.temp/release-verification.json
+                  if-no-files-found: warn
+
+            - name: Sign in to Docker Hub
+              uses: docker/login-action@v4
+              with:
+                  username: ${{ steps.release.outputs.dockerhub_username }}
+                  password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+            - name: Publish tested image
+              run: docker push ${{ steps.release.outputs.image }}:${{ steps.release.outputs.version }}
+
+            - name: Tag published release
+              working-directory: delivery/workbench
+              env:
+                  RELEASE_TAG: web-editor/v${{ steps.release.outputs.version }}
+              run: |
+                  if git rev-parse --verify --quiet "refs/tags/$RELEASE_TAG"; then
+                      echo "Release tag already exists: $RELEASE_TAG" >&2
+                      exit 1
+                  fi
+                  git config user.name 'github-actions[bot]'
+                  git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+                  git tag --annotate "$RELEASE_TAG" --message "Web editor $RELEASE_TAG"
+                  git push origin "$RELEASE_TAG"
+
+            - name: Merge release into master
+              working-directory: delivery/workbench
+              run: |
+                  git fetch origin master
+                  if ! git merge-base --is-ancestor origin/master HEAD; then
+                      message='The image and tag were published, but master has independent commits and cannot fast-forward to this release.'
+                      echo "::error title=Cannot fast-forward master::$message"
+                      echo '## Release published; master not updated' >> "$GITHUB_STEP_SUMMARY"
+                      echo "$message" >> "$GITHUB_STEP_SUMMARY"
+                      exit 1
+                  fi
+                  git push origin HEAD:master
+                  echo '## Release published and merged into master' >> "$GITHUB_STEP_SUMMARY"
