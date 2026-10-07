@@ -1,6 +1,6 @@
 services:
   web-editor:
-    image: mermaid-bpmn-workbench-web-editor:${WEB_EDITOR_TAG:?Set WEB_EDITOR_TAG to the editor package version}
+    image: ${WEB_EDITOR_IMAGE:?Set WEB_EDITOR_IMAGE to the editor image repository}:${WEB_EDITOR_TAG:?Set WEB_EDITOR_TAG to the editor image version}
     ports:
       - "8080:8080"
     restart: unless-stopped

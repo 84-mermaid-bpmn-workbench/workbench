@@ -2,15 +2,45 @@
 
 ## Prerequisites
 
-- Run the commands from the workspace root in the environment with Docker present with `jq` available.
+- Run the commands from the workspace root in an environment with Docker available.
 
 ## Build and start
 
-The deployment script reads the version from `_mermaid-bpmn-fork/package.json` with `jq` and uses it for both the image tag and OCI version label. Each build uses `--no-cache`. From the workspace root in WSL, build the image with:
+The deployment script reads the image repository from `workbench/web-editor/.env` and the image version from `workbench/web-editor/VERSION`. It uses both values for the image tag and uses the version for the OCI version label. Each build uses `--no-cache`. From the workspace root in WSL, build the image with:
 
 ```bash
 bash workbench/web-editor/deploy.sh build
 ```
+
+The resulting image is `<WEB_EDITOR_IMAGE>:<version from VERSION>`.
+
+## Docker smoke E2E test
+
+After building the image, run this command from `workbench/web-editor/` in WSL:
+
+```bash
+npm run test:smoke
+```
+
+The test starts the prepared local image, verifies that it serves the editor over HTTP, stops the container, and writes its result to `tests/.temp/release-verification.json`.
+
+## Release preparation
+
+From `workbench/web-editor/`, prepare the release branch and image with:
+
+```bash
+npm run release:prepare
+```
+
+The command removes the previous smoke-test result, creates or checks out `release/web-editor/<version from VERSION>`, builds the image, and prints the required smoke-test command.
+
+After the smoke test has written a green matching `release-verification.json`, publish the release branch with:
+
+```bash
+npm run release:publish
+```
+
+The command requires the expected release branch, a clean working tree, and a green smoke result created after the prepared image build. It then pushes the branch to `origin`.
 
 To build the image and start the Compose service in one step, run:
 

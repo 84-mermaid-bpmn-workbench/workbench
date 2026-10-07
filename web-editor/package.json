@@ -1,0 +1,13 @@
+{
+    "name": "mermaid-bpmn-workbench-web-editor-delivery",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "release:prepare": "node .delivery/scripts/release.mjs prepare",
+        "release:publish": "node .delivery/scripts/release.mjs publish",
+        "test:smoke": "node tests/runDockerSmokeE2E.mjs"
+    },
+    "engines": {
+        "node": ">=22.12.0"
+    }
+}

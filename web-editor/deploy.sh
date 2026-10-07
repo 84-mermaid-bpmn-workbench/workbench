@@ -3,29 +3,42 @@ set -euo pipefail
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 workspace_root="$(cd -- "$script_dir/../.." && pwd)"
-package_json="$workspace_root/_mermaid-bpmn-fork/package.json"
+version_file="$script_dir/VERSION"
+environment_file="$script_dir/.env"
 compose_file="$script_dir/compose.yaml"
-image_name="mermaid-bpmn-workbench-web-editor"
 action="${1:-}"
 
-if ! command -v jq >/dev/null 2>&1; then
-  printf '%s\n' 'Error: jq is required to read the editor version from package.json.' >&2
+if [[ ! -f "$version_file" ]]; then
+  printf 'Error: editor version file not found: %s\n' "$version_file" >&2
   exit 1
 fi
 
-if [[ ! -f "$package_json" ]]; then
-  printf 'Error: editor package file not found: %s\n' "$package_json" >&2
+if [[ ! -f "$environment_file" ]]; then
+  printf 'Error: editor environment file not found: %s\n' "$environment_file" >&2
   exit 1
 fi
 
-editor_version="$(jq -er '.version | select(type == "string" and length > 0)' "$package_json")"
+editor_version="$(tr -d '\r\n' < "$version_file")"
+if [[ -z "$editor_version" ]]; then
+  printf 'Error: editor version file is empty: %s\n' "$version_file" >&2
+  exit 1
+fi
+
+set -a
+. "$environment_file"
+set +a
+
+if [[ -z "${WEB_EDITOR_IMAGE:-}" ]]; then
+  printf 'Error: WEB_EDITOR_IMAGE is required in %s\n' "$environment_file" >&2
+  exit 1
+fi
 
 build_image() {
   docker build \
     --no-cache \
     --file "$script_dir/Dockerfile" \
     --build-arg "WEB_EDITOR_VERSION=$editor_version" \
-    --tag "$image_name:$editor_version" \
+    --tag "$WEB_EDITOR_IMAGE:$editor_version" \
     "$workspace_root"
 }
 
@@ -33,6 +46,7 @@ run_compose() {
   WEB_EDITOR_TAG="$editor_version" docker compose \
     --project-directory "$workspace_root" \
     --file "$compose_file" \
+    --env-file "$environment_file" \
     "$@"
 }
 
