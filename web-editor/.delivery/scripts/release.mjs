@@ -110,7 +110,12 @@ async function getLatestReleaseTag() {
 }
 
 async function hasChangedImageInputsSince(tag) {
-    const staticInputs = ['web-editor/Dockerfile', 'web-editor/nginx.conf', 'web-editor/prepare-site.mjs'];
+    const staticInputs = [
+        '.github/workflows/web-editor-release.yml',
+        'web-editor/Dockerfile',
+        'web-editor/nginx.conf',
+        'web-editor/prepare-site.mjs',
+    ];
     const actual = await execFile('git', ['diff', '--name-only', tag, '--', ...staticInputs], { cwd: workbenchRoot });
     if (actual.stdout.trim().length > 0) {
         return true;

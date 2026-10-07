@@ -11,11 +11,14 @@ RUN npm run build:examples -- --base=/ --outDir=/build \
 
 FROM nginxinc/nginx-unprivileged:alpine AS runtime
 ARG WEB_EDITOR_VERSION
+ARG WEB_EDITOR_REVISION
 
 LABEL org.opencontainers.image.title="mermaid-bpmn-workbench-web-editor" \
       org.opencontainers.image.description="Self-hosted Mermaid BPMN web editor" \
       org.opencontainers.image.source="https://github.com/84-mermaid-bpmn-workbench/workbench" \
+      org.opencontainers.image.revision="${WEB_EDITOR_REVISION}" \
       org.opencontainers.image.version="${WEB_EDITOR_VERSION}" \
+      org.opencontainers.image.documentation="https://github.com/84-mermaid-bpmn-workbench/workbench/blob/${WEB_EDITOR_REVISION}/web-editor/Dockerfile" \
       org.opencontainers.image.licenses="MIT"
 
 COPY workbench/web-editor/nginx.conf /etc/nginx/conf.d/default.conf

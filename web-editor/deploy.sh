@@ -29,6 +29,7 @@ if (typeof release.mermaid_bpmn_fork_revision !== "string" || release.mermaid_bp
 }
 console.log(release.version);
 ' "$release_file")"
+editor_revision="$(git -C "$workspace_root/workbench" rev-parse HEAD)"
 
 set -a
 . "$environment_file"
@@ -44,6 +45,7 @@ build_image() {
     --no-cache \
     --file "$script_dir/Dockerfile" \
     --build-arg "WEB_EDITOR_VERSION=$editor_version" \
+    --build-arg "WEB_EDITOR_REVISION=$editor_revision" \
     --tag "$WEB_EDITOR_IMAGE:$editor_version" \
     "$workspace_root"
 }
