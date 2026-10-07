@@ -9,7 +9,7 @@ COPY workbench/web-editor/prepare-site.mjs /prepare-site.mjs
 RUN npm run build:examples -- --base=/ --outDir=/build \
     && node /prepare-site.mjs
 
-FROM nginxinc/nginx-unprivileged:1.31.6-trixie AS runtime
+FROM nginxinc/nginx-unprivileged:alpine AS runtime
 ARG WEB_EDITOR_VERSION
 
 LABEL org.opencontainers.image.title="mermaid-bpmn-workbench-web-editor" \
