@@ -40,7 +40,7 @@ After the smoke test has written a green matching `release-verification.json`, p
 npm run release:publish
 ```
 
-The command requires the expected release branch, a clean working tree, and a green smoke result created after the prepared image build. It then pushes the branch to `origin`.
+The command requires the expected release branch and a green smoke result created after the prepared image build. It then asks for `A` or `C`. On `A`, it stages only `web-editor`, commits `release(web-editor): <version from VERSION>`, and pushes the branch to `origin`.
 
 To build the image and start the Compose service in one step, run:
 
