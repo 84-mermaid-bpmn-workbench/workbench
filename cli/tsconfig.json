@@ -14,7 +14,7 @@
         "paths": {
             "@src/*": ["./src/*"],
             "@tests/*": ["./tests/*"],
-            "@fixtures/*": ["tests/.ancillary/fixtures/*"]
+            "@fixtures/*": ["./tests/.ancillary/fixtures/*"]
         }
     },
     "include": ["./src", "./eslint.config.mjs", "*.d.ts", "./tests/**/*.ts", "tests/.ancillary/**/*.*"],

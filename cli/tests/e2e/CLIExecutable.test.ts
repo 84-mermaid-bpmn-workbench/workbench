@@ -40,6 +40,40 @@ describe('[e2e] CLIExecutable Test', () => {
 
         expect(actual).toContain(cliExecutableFixture.svgOpeningTag);
     });
+
+    it('+run(): Should render a Lucide icon from the local icon pack', async () => {
+        const browserExecutablePath = env[cliExecutableFixture.browserPathEnvironmentVariable];
+
+        if (browserExecutablePath === undefined) {
+            throw new Error(`${cliExecutableFixture.browserPathEnvironmentVariable} must name a Chrome or Chromium executable.`);
+        }
+
+        await mkdir(cliExecutableFixture.outputDirectory, { recursive: true });
+        await rm(cliExecutableFixture.localIconOutputPath, { force: true });
+        try {
+            await execFileAsync(
+                execPath,
+                [
+                    cliExecutableFixture.executablePath,
+                    '--input',
+                    cliExecutableFixture.localIconInputPath,
+                    '--output',
+                    cliExecutableFixture.localIconOutputPath
+                ],
+                { env: { ...env, [cliExecutableFixture.browserPathEnvironmentVariable]: browserExecutablePath } }
+            );
+        } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            const standardOutput = getCommandOutput(error, 'stdout');
+            const standardError = getCommandOutput(error, 'stderr');
+
+            throw new Error(`${message}\nstdout:\n${standardOutput}\nstderr:\n${standardError}`, { cause: error });
+        }
+
+        const actual = await readFile(cliExecutableFixture.localIconOutputPath, 'utf8');
+
+        expect(actual).toContain(cliExecutableFixture.iconClassAttribute);
+    });
 });
 
 function getCommandOutput(error: unknown, property: 'stdout' | 'stderr'): string {
