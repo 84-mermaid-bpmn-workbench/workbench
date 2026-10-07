@@ -32,7 +32,7 @@ From `workbench/web-editor/`, prepare the release branch and image with:
 npm run release:prepare
 ```
 
-The command removes the previous smoke-test result, creates or checks out `release/web-editor/<version from release.json>`, builds the image, and prints the required smoke-test command.
+The command removes the previous smoke-test result, validates the release version and image inputs against the latest `web-editor/v*` tag reachable from `master`, creates or checks out `release/web-editor/<version from release.json>`, builds the image, and prints the required smoke-test command. When no web-editor release tag exists, only the bootstrap version `1.0.0` is accepted.
 
 After the smoke test has written a green matching `release-verification.json`, publish the release branch with:
 
@@ -41,6 +41,12 @@ npm run release:publish
 ```
 
 The command requires the expected release branch, at least one change under `web-editor`, and a green smoke result created after the prepared image build. It then asks for `A` or `C`. On `A`, it stages all non-ignored working-tree changes, commits `release(web-editor): <version from release.json>`, and pushes the branch to `origin`.
+
+## GitHub Actions publication
+
+Pushing `release/web-editor/*` runs the GitHub Actions workflow. It checks out the fork revision recorded in `release.json`, builds and smoke-tests the image, pushes the tested image to Docker Hub, and then creates the `web-editor/v<version>` Git tag.
+
+Configure the `DOCKERHUB_TOKEN` repository secret in GitHub with a Docker Hub access token that can push `valentineshidev/mermaid-bpmn-workbench-web-editor`.
 
 To build the image and start the Compose service in one step, run:
 

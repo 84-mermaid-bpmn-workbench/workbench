@@ -1,4 +1,4 @@
-import puppeteer from 'puppeteer-core';
+import puppeteer, { type Browser } from 'puppeteer-core';
 import type { BrowserExecutablePathVO } from './BrowserExecutablePath.valueobject.js';
 
 export type TBrowserPageControllerOptions = {
@@ -29,18 +29,33 @@ export class BrowserPageController {
     }
 
     public async renderSVG(source: string): Promise<string> {
-        const browser = await puppeteer.launch({
-            executablePath: this.browserExecutablePath.path,
-            headless: true,
-        });
+        const executablePath = this.browserExecutablePath.path;
+
+        let browser: Browser;
+        try {
+            browser = await puppeteer.launch({ executablePath, headless: true });
+        } catch (error) {
+            throw new Error(`Failed to launch the browser at ${executablePath}: ${(error as Error).message}`);
+        }
 
         try {
             const page = await browser.newPage();
+            const pageErrors: string[] = [];
+            page.on('pageerror', (error) => pageErrors.push(String(error)));
+
             await page.goto(this.rendererPageURL.href, { waitUntil: 'load' });
+
+            const isRendererReady = await page.evaluate(() => typeof window.browserPageRenderer !== 'undefined');
+            if (!isRendererReady) {
+                throw new Error(`The renderer page did not initialize. ${pageErrors.join('; ')}`.trim());
+            }
 
             return await page.evaluate(async (diagramSource: string): Promise<string> => {
                 return window.browserPageRenderer.renderFromSource(diagramSource);
             }, source);
+        } catch (error) {
+            const version = await browser.version().catch(() => 'unknown version');
+            throw new Error(`${(error as Error).message} (browser: ${executablePath}, ${version})`);
         } finally {
             await browser.close();
         }
