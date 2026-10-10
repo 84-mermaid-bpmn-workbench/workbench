@@ -9,13 +9,14 @@ const scriptDirectory = dirname(fileURLToPath(import.meta.url));
 const cliDirectory = resolve(scriptDirectory, '../..');
 const temporaryDirectory = resolve(cliDirectory, '.delivery/.temp/release-check');
 const browserPathEnvironmentVariable = 'MERMAID_BPMN_CLI_BROWSER_PATH';
+const browserNoSandboxEnvironmentVariable = 'MERMAID_BPMN_CLI_BROWSER_NO_SANDBOX';
 const browserExecutablePath = requireBrowserPath();
 
 try {
     await rm(temporaryDirectory, { recursive: true, force: true });
     await runNpm(['run', 'check-types']);
     await runNpm(['run', 'lint']);
-    await runNpm(['run', 'test:foundation']);
+    await runNpm(['run', 'test:foundation'], { [browserNoSandboxEnvironmentVariable]: 'false' });
     await runNpm(['run', 'build']);
     await runNpm(['run', 'vitest:e2e'], { [browserPathEnvironmentVariable]: browserExecutablePath });
 
