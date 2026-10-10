@@ -28,7 +28,7 @@
     "type": "module",
     "license": "MIT",
     "bin": {
-        "mermaid-bpmn-cli": "./.delivery/.builds/dist/cli.js"
+        "mermaid-bpmn-cli": ".delivery/.builds/dist/cli.js"
     },
     "exports": {
         ".": {

@@ -154,6 +154,13 @@ jobs:
                       echo 'bootstrap=false' >> "$GITHUB_OUTPUT"
                   fi
 
+            - name: Configure npm registry token authentication
+              if: steps.npm_authentication.outputs.bootstrap == 'true'
+              uses: actions/setup-node@v6
+              with:
+                  node-version: 24
+                  registry-url: https://registry.npmjs.org
+
             - name: Publish initial package with npm token
               if: steps.npm_authentication.outputs.bootstrap == 'true'
               working-directory: cli
