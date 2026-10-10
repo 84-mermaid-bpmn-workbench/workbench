@@ -46,7 +46,9 @@
         "build": "tsx .delivery/scripts/build.ts --target=all",
         "build:browser": "tsx .delivery/scripts/build.ts --target=browser",
         "build:node": "tsx .delivery/scripts/build.ts --target=node",
-        "clean": "tsx .delivery/scripts/build.ts --target=clean"
+        "clean": "tsx .delivery/scripts/build.ts --target=clean",
+        "release:check": "tsx .delivery/scripts/release-check.ts",
+        "release:prepare": "tsx .delivery/scripts/release.ts prepare"
     },
     "engines": {
         "node": ">=22.12.0"

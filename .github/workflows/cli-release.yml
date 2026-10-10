@@ -1,0 +1,184 @@
+name: Verify and publish CLI release
+
+on:
+    push:
+        branches:
+            - 'release/cli/*'
+    pull_request:
+        branches:
+            - master
+        types:
+            - closed
+
+jobs:
+    prepare:
+        name: Verify and open CLI release pull request
+        if: github.event_name == 'push'
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            pull-requests: write
+
+        steps:
+            - name: Check out workbench
+              uses: actions/checkout@v6
+
+            - name: Set up Node.js
+              uses: actions/setup-node@v6
+              with:
+                  node-version: 22
+                  cache: npm
+                  cache-dependency-path: cli/package-lock.json
+
+            - name: Set up Chrome
+              id: chrome
+              uses: browser-actions/setup-chrome@v2
+              with:
+                  install-dependencies: true
+
+            - name: Install CLI dependencies
+              working-directory: cli
+              run: npm ci
+
+            - name: Verify release branch version
+              id: release
+              working-directory: cli
+              env:
+                  RELEASE_BRANCH: ${{ github.ref_name }}
+              run: |
+                  node --input-type=module --eval '
+                      import { readFileSync } from "node:fs";
+                      const version = JSON.parse(readFileSync("package.json", "utf8")).version;
+                      const expectedBranch = `release/cli/${version}`;
+                      if (process.env.RELEASE_BRANCH !== expectedBranch) throw new Error(`Expected ${expectedBranch}; found ${process.env.RELEASE_BRANCH}.`);
+                      console.log(`version=${version}`);
+                  ' >> "$GITHUB_OUTPUT"
+
+            - name: Verify release candidate
+              working-directory: cli
+              env:
+                  MERMAID_BPMN_CLI_BROWSER_PATH: ${{ steps.chrome.outputs.chrome-path }}
+              run: npm run release:check
+
+            - name: Open release pull request
+              uses: actions/github-script@v8
+              env:
+                  VERSION: ${{ steps.release.outputs.version }}
+              with:
+                  script: |
+                      const head = `${context.repo.owner}:release/cli/${process.env.VERSION}`;
+                      const existing = await github.rest.pulls.list({
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          head,
+                          base: 'master',
+                          state: 'open',
+                      });
+                      if (existing.data.length === 0) {
+                          await github.rest.pulls.create({
+                              owner: context.repo.owner,
+                              repo: context.repo.repo,
+                              head: `release/cli/${process.env.VERSION}`,
+                              base: 'master',
+                              title: `release(cli): ${process.env.VERSION}`,
+                              body: 'Automated CLI release candidate. Merge after review to publish the package.',
+                          });
+                      }
+
+    publish:
+        name: Publish merged CLI release
+        if: >-
+            github.event_name == 'pull_request' &&
+            github.event.pull_request.merged == true &&
+            github.event.pull_request.head.repo.full_name == github.repository &&
+            startsWith(github.event.pull_request.head.ref, 'release/cli/')
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+            id-token: write
+
+        steps:
+            - name: Check out merged release
+              uses: actions/checkout@v6
+              with:
+                  fetch-depth: 0
+                  ref: ${{ github.event.pull_request.merge_commit_sha }}
+
+            - name: Set up Node.js
+              uses: actions/setup-node@v6
+              with:
+                  node-version: 24
+                  cache: npm
+                  cache-dependency-path: cli/package-lock.json
+
+            - name: Set up Chrome
+              id: chrome
+              uses: browser-actions/setup-chrome@v2
+              with:
+                  install-dependencies: true
+
+            - name: Install CLI dependencies
+              working-directory: cli
+              run: npm ci
+
+            - name: Verify merged release version
+              id: release
+              working-directory: cli
+              env:
+                  RELEASE_BRANCH: ${{ github.event.pull_request.head.ref }}
+              run: |
+                  node --input-type=module --eval '
+                      import { readFileSync } from "node:fs";
+                      const version = JSON.parse(readFileSync("package.json", "utf8")).version;
+                      const expectedBranch = `release/cli/${version}`;
+                      if (process.env.RELEASE_BRANCH !== expectedBranch) throw new Error(`Expected ${expectedBranch}; found ${process.env.RELEASE_BRANCH}.`);
+                      console.log(`version=${version}`);
+                  ' >> "$GITHUB_OUTPUT"
+
+            - name: Verify merged release
+              working-directory: cli
+              env:
+                  MERMAID_BPMN_CLI_BROWSER_PATH: ${{ steps.chrome.outputs.chrome-path }}
+              run: npm run release:check
+
+            - name: Determine npm publication authentication
+              id: npm_authentication
+              env:
+                  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+              run: |
+                  if [ -n "$NPM_TOKEN" ]; then
+                      echo 'bootstrap=true' >> "$GITHUB_OUTPUT"
+                  else
+                      echo 'bootstrap=false' >> "$GITHUB_OUTPUT"
+                  fi
+
+            - name: Publish initial package with npm token
+              if: steps.npm_authentication.outputs.bootstrap == 'true'
+              working-directory: cli
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+              run: npm publish --provenance
+
+            - name: Publish package with npm trusted publishing
+              if: steps.npm_authentication.outputs.bootstrap == 'false'
+              working-directory: cli
+              run: npm publish
+
+            - name: Tag published release
+              env:
+                  RELEASE_TAG: cli/v${{ steps.release.outputs.version }}
+              run: |
+                  if git rev-parse --verify --quiet "refs/tags/$RELEASE_TAG"; then
+                      echo "Release tag already exists: $RELEASE_TAG" >&2
+                      exit 1
+                  fi
+                  git config user.name 'github-actions[bot]'
+                  git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+                  git tag --annotate "$RELEASE_TAG" --message "CLI $RELEASE_TAG"
+                  git push origin "$RELEASE_TAG"
+
+            - name: Create GitHub release
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  RELEASE_TAG: cli/v${{ steps.release.outputs.version }}
+              run: gh release create "$RELEASE_TAG" --title "$RELEASE_TAG" --generate-notes
