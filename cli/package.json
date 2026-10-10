@@ -2,6 +2,29 @@
     "name": "mermaid-bpmn-cli",
     "version": "0.1.0",
     "description": "Render Mermaid-BPMN source to SVG locally.",
+    "keywords": [
+        "mermaid",
+        "bpmn",
+        "svg",
+        "diagram",
+        "cli",
+        "architecture",
+        "design",
+        "business process",
+        "ddd",
+        "microservices"
+    ],
+    "author": {
+        "name": "Valentine Shimanovsky",
+        "email": "valentineshi.dev@gmail.com"
+    },
+    "homepage": "https://github.com/84-mermaid-bpmn-workbench/workbench/tree/master/cli#readme",
+    "bugs": "https://github.com/84-mermaid-bpmn-workbench/workbench/issues",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/84-mermaid-bpmn-workbench/workbench.git",
+        "directory": "cli"
+    },
     "type": "module",
     "license": "MIT",
     "bin": {
