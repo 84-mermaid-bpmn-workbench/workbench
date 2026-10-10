@@ -58,6 +58,7 @@ jobs:
               working-directory: cli
               env:
                   MERMAID_BPMN_CLI_BROWSER_PATH: ${{ steps.chrome.outputs.chrome-path }}
+                  MERMAID_BPMN_CLI_BROWSER_NO_SANDBOX: 'true'
               run: npm run release:check
 
             - name: Open release pull request
@@ -139,6 +140,7 @@ jobs:
               working-directory: cli
               env:
                   MERMAID_BPMN_CLI_BROWSER_PATH: ${{ steps.chrome.outputs.chrome-path }}
+                  MERMAID_BPMN_CLI_BROWSER_NO_SANDBOX: 'true'
               run: npm run release:check
 
             - name: Determine npm publication authentication

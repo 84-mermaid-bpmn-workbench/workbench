@@ -6,6 +6,8 @@ export type TBrowserPageControllerOptions = {
     rendererPageURL?: URL;
 };
 
+const noSandboxEnvironmentVariable = 'MERMAID_BPMN_CLI_BROWSER_NO_SANDBOX';
+
 /**
  * Mermaid-BPMN rendering must run in a browser page because it depends on browser DOM and SVG measurement behavior.
  *
@@ -30,10 +32,13 @@ export class BrowserPageController {
 
     public async renderSVG(source: string): Promise<string> {
         const executablePath = this.browserExecutablePath.path;
+        const launchOptions = process.env[noSandboxEnvironmentVariable] === 'true'
+            ? { executablePath, headless: true, args: ['--no-sandbox'] }
+            : { executablePath, headless: true };
 
         let browser: Browser;
         try {
-            browser = await puppeteer.launch({ executablePath, headless: true });
+            browser = await puppeteer.launch(launchOptions);
         } catch (error) {
             throw new Error(`Failed to launch the browser at ${executablePath}: ${(error as Error).message}`, { cause: error });
         }
