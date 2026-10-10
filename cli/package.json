@@ -20,9 +20,10 @@
         "vitest:e2e": "vitest run --mode e2e --config tests/.ancillary/config/vitest.config.ts",
         "check-types": "npx tsc --noEmit",
         "lint": "eslint .",
-        "build": "node .delivery/scripts/clean-build.mjs && npm run build:node && npm run build:browser",
-        "build:browser": "node .delivery/scripts/build-browser.mjs",
-        "build:node": "npx tsc --build --force .delivery/configuration/tsconfig.json"
+        "build": "tsx .delivery/scripts/build.ts --target=all",
+        "build:browser": "tsx .delivery/scripts/build.ts --target=browser",
+        "build:node": "tsx .delivery/scripts/build.ts --target=node",
+        "clean": "tsx .delivery/scripts/build.ts --target=clean"
     },
     "engines": {
         "node": ">=22.12.0"
@@ -49,6 +50,7 @@
         "esbuild": "^0.28.2",
         "eslint": "^10.10.0",
         "prettier": "^3.8.4",
+        "tsx": "^4.23.15",
         "typescript": "^5.9.3",
         "typescript-eslint": "^8.70.0",
         "vitest": "^4.1.9"

@@ -17,6 +17,6 @@
             "@fixtures/*": ["./tests/.ancillary/fixtures/*"]
         }
     },
-    "include": ["./src", "./eslint.config.mjs", "*.d.ts", "./tests/**/*.ts", "tests/.ancillary/**/*.*"],
-    "exclude": ["./.delivery/**", "./node_modules/**", ".coverage"]
+    "include": ["./src", "./eslint.config.mjs", "*.d.ts", "./tests/**/*.ts", "tests/.ancillary/**/*.*", "./.delivery/scripts/build.ts"],
+    "exclude": ["./.delivery/.builds/**", "./.delivery/.temp/**", "./.delivery/configuration/**", "./node_modules/**", ".coverage"]
 }
