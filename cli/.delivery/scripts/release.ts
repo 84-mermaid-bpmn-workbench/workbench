@@ -24,7 +24,7 @@ const program = new Command()
 
 program
     .command('prepare')
-    .description('Create, verify, commit, and push a CLI release.')
+    .description('Create, verify, and push a CLI release branch.')
     .action(async () => await prepareRelease());
 
 try {
@@ -43,7 +43,7 @@ async function prepareRelease(): Promise<void> {
     const releaseBranch = `release/cli/${version}`;
 
     await checkoutReleaseBranch(releaseBranch);
-    await updatePackageVersions(version);
+    await ensurePackageVersions(version);
     const preparationID = `${Date.now()}-${process.hrtime.bigint()}`;
     await writeVerification({
         prepare: { version, preparationID, preparedAt: new Date().toISOString() },
@@ -75,8 +75,6 @@ async function prepareRelease(): Promise<void> {
         return;
     }
 
-    await runCommand('git', ['add', '--all'], workbenchRoot);
-    await runCommand('git', ['commit', '--message', `release(cli): ${version}`], workbenchRoot);
     await runCommand('git', ['push', '--set-upstream', 'origin', releaseBranch], workbenchRoot);
     console.log(`Release branch ${releaseBranch} was pushed. GitHub Actions will verify it and open a pull request to master.`);
 }
@@ -144,14 +142,15 @@ async function localBranchExists(branch: string): Promise<boolean> {
     }
 }
 
-async function updatePackageVersions(version: string): Promise<void> {
+async function ensurePackageVersions(version: string): Promise<void> {
     const packageJSON = JSON.parse(await readFile(packagePath, 'utf8')) as { version: string };
     const packageLockJSON = JSON.parse(await readFile(packageLockPath, 'utf8')) as { version: string; packages: Record<string, { version?: string }> };
-    packageJSON.version = version;
-    packageLockJSON.version = version;
-    packageLockJSON.packages[''].version = version;
-    await writeFile(packagePath, `${JSON.stringify(packageJSON, null, 4)}\n`);
-    await writeFile(packageLockPath, `${JSON.stringify(packageLockJSON, null, 4)}\n`);
+    const isPackageVersionCorrect = packageJSON.version === version;
+    const isPackageLockVersionCorrect = packageLockJSON.version === version && packageLockJSON.packages[''].version === version;
+
+    if (!isPackageVersionCorrect || !isPackageLockVersionCorrect) {
+        throw new Error(`Commit version ${version} to cli/package.json and cli/package-lock.json on master before preparing the release.`);
+    }
 }
 
 async function ensureCLIChangesSinceLatestRelease(latestReleaseTag: string | null): Promise<void> {
@@ -169,7 +168,7 @@ async function ensureCLIChangesSinceLatestRelease(latestReleaseTag: string | nul
 async function confirmRelease(): Promise<boolean> {
     const interaction = createInterface({ input: stdin, output: stdout });
     try {
-        const answer = await interaction.question('Release is ready to commit and push. Type A to accept or C to cancel: ');
+        const answer = await interaction.question('Release is ready to push. Type A to accept or C to cancel: ');
         return answer.trim().toUpperCase() === 'A';
     } finally {
         interaction.close();
