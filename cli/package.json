@@ -1,6 +1,6 @@
 {
     "name": "mermaid-bpmn-cli",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Render Mermaid-BPMN source to SVG locally.",
     "keywords": [
         "mermaid",
