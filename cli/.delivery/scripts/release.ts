@@ -87,16 +87,28 @@ async function getLatestReleaseTag(): Promise<string | null> {
 }
 
 async function determineVersion(latestReleaseTag: string | null): Promise<string> {
-    const baselineVersion = latestReleaseTag?.slice(releaseTagPrefix.length) ?? '0.0.0';
+    const baselineVersion = await getMasterPackageVersion();
     const commitsArguments = latestReleaseTag === null
         ? ['log', '--format=%h %s', '-10', 'master']
         : ['log', '--format=%h %s', '-10', `${latestReleaseTag}..master`];
     const commits = await execFile('git', commitsArguments, { cwd: workbenchRoot });
-    const baseline = latestReleaseTag ?? `the initial ${baselineVersion} baseline`;
-    console.log(`Commits since ${baseline}:`);
+    const commitsBaseline = latestReleaseTag ?? 'the first CLI commit';
+    console.log(`Commits since ${commitsBaseline}:`);
     console.log(commits.stdout.trim() || '(none)');
+    console.log(`Current package version on master: ${baselineVersion}`);
     const increment = await askForIncrement();
     return incrementVersion(baselineVersion, increment);
+}
+
+async function getMasterPackageVersion(): Promise<string> {
+    const actual = await execFile('git', ['show', 'master:cli/package.json'], { cwd: workbenchRoot });
+    const packageJSON = JSON.parse(actual.stdout) as { version?: unknown };
+
+    if (typeof packageJSON.version !== 'string') {
+        throw new Error('master:cli/package.json must contain a version string.');
+    }
+
+    return packageJSON.version;
 }
 
 async function askForIncrement(): Promise<'major' | 'minor' | 'patch'> {

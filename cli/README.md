@@ -104,7 +104,7 @@ $env:MERMAID_BPMN_CLI_BROWSER_PATH = 'C:\Program Files\Google\Chrome\Application
 npm run release:prepare
 ```
 
-The command shows up to ten commit messages since the latest `cli/v*` tag and asks for `[1] Patch`, `[5] Minor`, or `[9] Major`. For the first release, it uses `0.0.0` as the baseline, so selecting `[1] Patch` produces `0.0.1`. The command creates `release/cli/<VERSION>` from `master`, updates the package manifests with the selected version, and runs the full release check. It then asks you to accept or cancel. Accepting commits only the version-manifest changes as `release(cli): <VERSION>` and pushes the release branch.
+The command shows up to ten commit messages since the latest `cli/v*` tag, displays the version committed in `master`’s `cli/package.json`, and asks for `[1] Patch`, `[5] Minor`, or `[9] Major`. It calculates the selected release version from that committed version; for example, `[1] Patch` changes `0.0.1` into `0.0.2`. The command creates `release/cli/<VERSION>` from `master`, updates the package manifests with the selected version, and runs the full release check. It then asks you to accept or cancel. Accepting commits only the version-manifest changes as `release(cli): <VERSION>` and pushes the release branch.
 
 GitHub Actions verifies the pushed release branch and opens a pull request to `master`. After the maintainer merges that pull request, Actions verifies the exact merge commit again, publishes the package, creates the matching `cli/v<VERSION>` tag, and creates a GitHub release. Pull the merged `master` branch and tags locally afterwards.
 
