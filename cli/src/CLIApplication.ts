@@ -13,8 +13,28 @@ import { renderSvg } from './index.js';
 export class CLIApplication {
     public async run(argumentsList: string[]): Promise<void> {
         const argumentsVO = CLIArgumentsVO.create(argumentsList);
-        const source = await readFile(argumentsVO.input, 'utf8');
+        const source = await this.readSource(argumentsVO.input);
         const svg = await renderSvg(source, { browserPath: argumentsVO.browser });
-        await writeFile(argumentsVO.output, svg, 'utf8');
+        await this.writeSVG(argumentsVO.output, svg);
+    }
+
+    private async readSource(sourcePath: string): Promise<string> {
+        try {
+            return await readFile(sourcePath, 'utf8');
+        } catch (error) {
+            throw new Error(`Cannot read Mermaid-BPMN source file ${sourcePath}: ${this.getErrorMessage(error)}`, { cause: error });
+        }
+    }
+
+    private async writeSVG(outputPath: string, svg: string): Promise<void> {
+        try {
+            await writeFile(outputPath, svg, 'utf8');
+        } catch (error) {
+            throw new Error(`Cannot write SVG output file ${outputPath}: ${this.getErrorMessage(error)}`, { cause: error });
+        }
+    }
+
+    private getErrorMessage(error: unknown): string {
+        return error instanceof Error ? error.message : String(error);
     }
 }

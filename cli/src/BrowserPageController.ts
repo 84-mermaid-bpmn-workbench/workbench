@@ -35,7 +35,7 @@ export class BrowserPageController {
         try {
             browser = await puppeteer.launch({ executablePath, headless: true });
         } catch (error) {
-            throw new Error(`Failed to launch the browser at ${executablePath}: ${(error as Error).message}`);
+            throw new Error(`Failed to launch the browser at ${executablePath}: ${(error as Error).message}`, { cause: error });
         }
 
         try {
@@ -55,7 +55,7 @@ export class BrowserPageController {
             }, source);
         } catch (error) {
             const version = await browser.version().catch(() => 'unknown version');
-            throw new Error(`${(error as Error).message} (browser: ${executablePath}, ${version})`);
+            throw new Error(`${(error as Error).message} (browser: ${executablePath}, ${version})`, { cause: error });
         } finally {
             await browser.close();
         }

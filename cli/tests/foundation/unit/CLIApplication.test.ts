@@ -77,9 +77,41 @@ describe('[unit] CLIApplication Test', () => {
         );
     });
 
-    it('+run() [failure]: Should reject an invalid CLI invocation', async () => {
+    it('+run() [failure] #1: Should reject an invalid CLI invocation', async () => {
         const application = new CLIApplication();
 
         await expect(application.run([])).rejects.toThrow();
+    });
+
+    it('+run() [failure] #2: Should identify an unreadable Mermaid-BPMN source file', async () => {
+        mockReadFile.mockRejectedValue(cliApplicationFixture.sourceReadError);
+        const application = new CLIApplication();
+
+        await expect(application.run(cliApplicationFixture.argumentsList)).rejects.toMatchObject({
+            message: cliApplicationFixture.sourceReadErrorMessage,
+            cause: cliApplicationFixture.sourceReadError
+        });
+        expect(mockRenderSvg).not.toHaveBeenCalled();
+    });
+
+    it('+run() [failure] #3: Should identify a non-Error source-file failure', async () => {
+        mockReadFile.mockRejectedValue(cliApplicationFixture.sourceReadFailure);
+        const application = new CLIApplication();
+
+        await expect(application.run(cliApplicationFixture.argumentsList)).rejects.toMatchObject({
+            message: cliApplicationFixture.sourceReadFailureMessage,
+            cause: cliApplicationFixture.sourceReadFailure
+        });
+        expect(mockRenderSvg).not.toHaveBeenCalled();
+    });
+
+    it('+run() [failure] #4: Should identify an unwritable SVG output file', async () => {
+        mockWriteFile.mockRejectedValue(cliApplicationFixture.outputWriteError);
+        const application = new CLIApplication();
+
+        await expect(application.run(cliApplicationFixture.argumentsList)).rejects.toMatchObject({
+            message: cliApplicationFixture.outputWriteErrorMessage,
+            cause: cliApplicationFixture.outputWriteError
+        });
     });
 });

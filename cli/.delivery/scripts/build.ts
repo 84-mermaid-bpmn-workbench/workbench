@@ -4,12 +4,14 @@ import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { Command, Option } from 'commander';
 import { build } from 'esbuild';
+import { localMermaidBPMNIconPackDefinitions } from '../../src/icon-packs.js';
 
 const browserEntryPoint = fileURLToPath(new URL('../../src/BrowserPageRenderer.ts', import.meta.url));
 const rendererSource = fileURLToPath(new URL('../../assets/renderer.html', import.meta.url));
 const outputDirectory = fileURLToPath(new URL('../.builds/dist', import.meta.url));
 const rendererOutputDirectory = fileURLToPath(new URL('../.builds/dist/assets', import.meta.url));
 const rendererOutput = fileURLToPath(new URL('../.builds/dist/assets/renderer.html', import.meta.url));
+const iconPacksOutputDirectory = fileURLToPath(new URL('../.builds/dist/icon-packs', import.meta.url));
 const nodeOutput = fileURLToPath(new URL('../.builds/dist/cli.js', import.meta.url));
 const typescriptConfiguration = fileURLToPath(new URL('../configuration/tsconfig.json', import.meta.url));
 const shebang = '#!/usr/bin/env node\n';
@@ -66,6 +68,7 @@ async function buildNode(): Promise<void> {
 async function buildBrowser(): Promise<void> {
     await mkdir(outputDirectory, { recursive: true });
     await mkdir(rendererOutputDirectory, { recursive: true });
+    await mkdir(iconPacksOutputDirectory, { recursive: true });
     await build({
         bundle: true,
         entryPoints: [browserEntryPoint],
@@ -75,7 +78,29 @@ async function buildBrowser(): Promise<void> {
         target: 'es2022',
         entryNames: 'BrowserPageRenderer'
     });
+    await Promise.all(localMermaidBPMNIconPackDefinitions.map((iconPack) => buildIconPack(iconPack)));
     await copyFile(rendererSource, rendererOutput);
+}
+
+async function buildIconPack(iconPack: { name: string; source: string }): Promise<void> {
+    const output = fileURLToPath(new URL(`../.builds/dist/icon-packs/${iconPack.name}.js`, import.meta.url));
+    const source = `import iconSet from ${JSON.stringify(iconPack.source)};
+window.mermaidBPMNIconPackAssets ??= {};
+window.mermaidBPMNIconPackAssets[${JSON.stringify(iconPack.name)}] = iconSet;`;
+
+    await build({
+        bundle: true,
+        format: 'iife',
+        outfile: output,
+        platform: 'browser',
+        stdin: {
+            contents: source,
+            resolveDir: fileURLToPath(new URL('../../', import.meta.url)),
+            sourcefile: `${iconPack.name}.ts`,
+            loader: 'ts'
+        },
+        target: 'es2022'
+    });
 }
 
 async function verifyNodeExecutable(): Promise<void> {

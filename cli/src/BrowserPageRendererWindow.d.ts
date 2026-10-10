@@ -13,7 +13,9 @@ type TBrowserPageRendererWindowAPI = {
 declare global {
     interface Window {
         browserPageRenderer: TBrowserPageRendererWindowAPI;
+        mermaidBPMNIconPackAssets: Record<string, IconifyJSON | undefined>;
     }
 }
 
 export {};
+import type { IconifyJSON } from '@iconify/types';

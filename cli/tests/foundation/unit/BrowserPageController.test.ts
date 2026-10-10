@@ -36,9 +36,11 @@ describe('[unit] BrowserPageController Test', () => {
             diagramSource: string
         ): Promise<string> => await render(diagramSource));
         const goto = vi.fn().mockResolvedValue(undefined);
+        const on = vi.fn();
         const close = vi.fn().mockResolvedValue(undefined);
-        const newPage = vi.fn().mockResolvedValue({ evaluate, goto });
-        mockLaunch.mockResolvedValue({ close, newPage });
+        const version = vi.fn().mockResolvedValue(browserPageControllerFixture.browserVersion);
+        const newPage = vi.fn().mockResolvedValue({ evaluate, goto, on });
+        mockLaunch.mockResolvedValue({ close, newPage, version });
         const controller = BrowserPageController.create({
             browserExecutablePath,
             rendererPageURL: browserPageControllerFixture.rendererPageURL
@@ -54,17 +56,53 @@ describe('[unit] BrowserPageController Test', () => {
         expect(close).toHaveBeenCalledOnce();
     });
 
-    it('+renderSVG() [failure]: Should close the browser when page navigation fails', async () => {
+    it('+renderSVG() [failure] #1: Should identify a browser launch failure', async () => {
         const browserExecutablePath = await BrowserExecutablePathVO.create({ path: process.execPath });
-        const goto = vi.fn().mockRejectedValue(browserPageControllerFixture.navigationError);
-        const close = vi.fn().mockResolvedValue(undefined);
-        const newPage = vi.fn().mockResolvedValue({ goto });
-        mockLaunch.mockResolvedValue({ close, newPage });
+        mockLaunch.mockRejectedValue(browserPageControllerFixture.browserLaunchError);
         const controller = BrowserPageController.create({ browserExecutablePath });
 
         await expect(controller.renderSVG(browserPageControllerFixture.source))
-            .rejects.toThrow(browserPageControllerFixture.navigationError);
+            .rejects.toMatchObject({
+                message: `Failed to launch the browser at ${browserExecutablePath.path}: ${browserPageControllerFixture.browserLaunchError.message}`,
+                cause: browserPageControllerFixture.browserLaunchError
+            });
+    });
 
+    it('+renderSVG() [failure] #2: Should close the browser when page navigation fails', async () => {
+        const browserExecutablePath = await BrowserExecutablePathVO.create({ path: process.execPath });
+        const goto = vi.fn().mockRejectedValue(browserPageControllerFixture.navigationError);
+        const on = vi.fn();
+        const close = vi.fn().mockResolvedValue(undefined);
+        const version = vi.fn().mockResolvedValue(browserPageControllerFixture.browserVersion);
+        const newPage = vi.fn().mockResolvedValue({ goto, on });
+        mockLaunch.mockResolvedValue({ close, newPage, version });
+        const controller = BrowserPageController.create({ browserExecutablePath });
+
+        await expect(controller.renderSVG(browserPageControllerFixture.source))
+            .rejects.toMatchObject({
+                message: `${browserPageControllerFixture.navigationError.message} (browser: ${browserExecutablePath.path}, ${browserPageControllerFixture.browserVersion})`,
+                cause: browserPageControllerFixture.navigationError
+            });
+
+        expect(close).toHaveBeenCalledOnce();
+    });
+
+    it('+renderSVG() [failure] #3: Should identify an uninitialized browser page renderer', async () => {
+        const browserExecutablePath = await BrowserExecutablePathVO.create({ path: process.execPath });
+        const goto = vi.fn().mockResolvedValue(undefined);
+        const evaluate = vi.fn().mockResolvedValue(false);
+        const on = vi.fn();
+        const close = vi.fn().mockResolvedValue(undefined);
+        const version = vi.fn().mockResolvedValue(browserPageControllerFixture.browserVersion);
+        const newPage = vi.fn().mockResolvedValue({ evaluate, goto, on });
+        mockLaunch.mockResolvedValue({ close, newPage, version });
+        const controller = BrowserPageController.create({ browserExecutablePath });
+
+        await expect(controller.renderSVG(browserPageControllerFixture.source))
+            .rejects.toMatchObject({
+                message: `${browserPageControllerFixture.rendererInitializationErrorMessage} (browser: ${browserExecutablePath.path}, ${browserPageControllerFixture.browserVersion})`,
+                cause: { message: browserPageControllerFixture.rendererInitializationErrorMessage }
+            });
         expect(close).toHaveBeenCalledOnce();
     });
 });
