@@ -38,6 +38,7 @@ try {
 async function prepareRelease(): Promise<void> {
     await rm(verificationPath, { force: true });
     const latestReleaseTag = await getLatestReleaseTag();
+    await ensureCLIChangesSinceLatestRelease(latestReleaseTag);
     const version = await determineVersion(latestReleaseTag);
     const releaseBranch = `release/cli/${version}`;
 
@@ -68,7 +69,6 @@ async function prepareRelease(): Promise<void> {
         throw error;
     }
 
-    await ensureCLIChanges();
     const accepted = await confirmRelease();
     if (!accepted) {
         console.log('Release publishing cancelled.');
@@ -154,21 +154,16 @@ async function updatePackageVersions(version: string): Promise<void> {
     await writeFile(packageLockPath, `${JSON.stringify(packageLockJSON, null, 4)}\n`);
 }
 
-async function ensureCLIChanges(): Promise<void> {
-    const changedPaths = await getChangedPaths();
-    if (!changedPaths.some((path) => path.startsWith('cli/'))) {
-        throw new Error('Release publishing requires at least one change under workbench/cli.');
-    }
-}
+async function ensureCLIChangesSinceLatestRelease(latestReleaseTag: string | null): Promise<void> {
+    const argumentsList = latestReleaseTag === null
+        ? ['log', '--format=%H', '-1', 'master', '--', 'cli']
+        : ['diff', '--name-only', `${latestReleaseTag}..master`, '--', 'cli'];
+    const actual = await execFile('git', argumentsList, { cwd: workbenchRoot });
 
-async function getChangedPaths(): Promise<string[]> {
-    const commands = [
-        ['diff', '--name-only'],
-        ['diff', '--cached', '--name-only'],
-        ['ls-files', '--others', '--exclude-standard'],
-    ];
-    const outputs = await Promise.all(commands.map(async (argumentsList) => await execFile('git', argumentsList, { cwd: workbenchRoot })));
-    return [...new Set(outputs.flatMap((output) => output.stdout.split('\n').filter(Boolean)))];
+    if (actual.stdout.trim().length === 0) {
+        const baseline = latestReleaseTag ?? 'the repository history';
+        throw new Error(`Release publishing requires a committed change under workbench/cli since ${baseline}.`);
+    }
 }
 
 async function confirmRelease(): Promise<boolean> {
