@@ -106,14 +106,20 @@ npm run release:prepare
 
 The command shows up to ten commit messages since the latest `cli/v*` tag, displays the version committed in `master`’s `cli/package.json`, and asks for `[1] Patch`, `[5] Minor`, or `[9] Major`. It calculates the selected release version from that committed version; for example, `[1] Patch` changes `0.0.1` into `0.0.2`. The command creates `release/cli/<VERSION>` from `master`, updates the package manifests with the selected version, and runs the full release check. It then asks you to accept or cancel. Accepting commits only the version-manifest changes as `release(cli): <VERSION>` and pushes the release branch.
 
-GitHub Actions verifies the pushed release branch and opens a pull request to `master`. After the maintainer merges that pull request, Actions verifies the exact merge commit again, publishes the package, creates the matching `cli/v<VERSION>` tag, and creates a GitHub release. Pull the merged `master` branch and tags locally afterwards.
+GitHub Actions verifies the pushed release branch and opens a pull request to `master`. After the maintainer merges that pull request, Actions verifies the exact merge commit again, publishes the package through npm trusted publishing, creates the matching `cli/v<VERSION>` tag, and creates a GitHub release. Pull the merged `master` branch and tags locally afterwards.
 
 #### Initial Publication
 
-npm requires the package to exist before it can be configured as a trusted publisher. The initial publication therefore uses a temporary granular write token stored as the `NPM_TOKEN` GitHub Actions secret. After that publication, configure `.github/workflows/cli-release.yml` as the package's npm trusted publisher and remove `NPM_TOKEN`; later releases then use GitHub Actions OIDC.
+Publish the first version directly with npm and complete its interactive two-factor authentication challenge:
 
-> [!NOTE]
-> Stage-only tokens cannot publish new package versions directly. Versions must be staged with `npm stage publish` and then promoted by a maintainer with two-factor authentication (2FA) enabled. This token can still deprecate versions and move dist-tags.
+```powershell
+$env:MERMAID_BPMN_CLI_BROWSER_PATH = 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+npm run release:check
+npm login
+npm publish
+```
+
+Then configure `cli-release.yml` as the `mermaid-bpmn-cli` package's npm trusted publisher. Select GitHub Actions, set the repository to `84-mermaid-bpmn-workbench/workbench`, and allow `npm publish`. Delete the `NPM_TOKEN` GitHub Actions secret. Future merged release pull requests publish through GitHub OIDC; no npm access token is used.
 
 ## Limitations
 
