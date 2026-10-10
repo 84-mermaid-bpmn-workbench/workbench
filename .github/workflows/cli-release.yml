@@ -166,7 +166,7 @@ jobs:
               working-directory: cli
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-              run: npm publish --provenance
+              run: npm publish --provenance --access public
 
             - name: Publish package with npm trusted publishing
               if: steps.npm_authentication.outputs.bootstrap == 'false'
