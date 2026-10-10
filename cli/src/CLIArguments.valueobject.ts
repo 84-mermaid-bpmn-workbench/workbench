@@ -1,5 +1,5 @@
 import { Command, Option } from 'commander';
-import { extname } from 'node:path';
+import { extname, resolve } from 'node:path';
 
 type TSelfPOJO = {
     inputPath: string;
@@ -25,8 +25,8 @@ type TCommanderOptions = {
  * The CLI accepts one Mermaid-BPMN source file and a small, explicit MVP option set.
  * One input path is mandatory. Supply it either with `-i, --input <path>` or as one
  * positional argument, but not both. `-o, --output <path>` is optional; without it,
- * the CLI replaces the input extension with `.svg`. An explicit output path must use
- * the `.svg` extension.
+ * the CLI replaces the input extension with `.svg`. The output path must differ from
+ * the source path. An explicit output path must use the `.svg` extension.
  *
  * A browser executable path is mandatory for rendering. Supply it with the optional
  * `--browser <path>` option, or set `MERMAID_BPMN_CLI_BROWSER_PATH`; the option takes
@@ -70,6 +70,7 @@ export class CLIArgumentsVO {
         const inputPath = this.resolveInputPath(command, options, command.args);
 
         const outputPath = options.output ?? this.deriveOutputPath(inputPath);
+        this.ensureOutputDoesNotOverwriteSource(inputPath, outputPath);
 
         const self: TSelfPOJO = {
             inputPath,
@@ -140,6 +141,14 @@ Examples:
         }
 
         return `${inputPath.slice(0, -extension.length)}.svg`;
+    }
+
+    private static ensureOutputDoesNotOverwriteSource(inputPath: string, outputPath: string): void {
+        const hasSameResolvedPath = (): boolean => resolve(inputPath) === resolve(outputPath);
+
+        if (hasSameResolvedPath()) {
+            throw new Error('The SVG output file must not overwrite the Mermaid-BPMN source file.');
+        }
     }
 
 }

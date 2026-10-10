@@ -2,7 +2,7 @@
 import { CommanderError } from 'commander';
 import { CLIApplication } from './CLIApplication.js';
 
-export async function runCLI(): Promise<void> {
+async function runCLI(): Promise<void> {
     try {
         const application = new CLIApplication();
         await application.run(process.argv.slice(2));

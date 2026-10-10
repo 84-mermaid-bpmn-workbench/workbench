@@ -4,6 +4,8 @@ export const cliArgumentsFixture = {
     environmentBrowserExecutablePath: 'chromium',
     inputPath: 'process.mmd',
     outputPath: 'process.svg',
+    svgInputPath: 'process.svg',
+    equivalentSVGInputPath: './process.svg',
     invalidOutputPath: 'process.sv',
     extensionlessInputPath: 'process',
     extensionlessOutputPath: 'process.svg',
@@ -11,6 +13,7 @@ export const cliArgumentsFixture = {
     conflictingInputSourcesError: 'Specify the input source with either --input or one positional argument, not both.',
     missingInputError: 'Specify an input source with --input <path> or one positional argument.',
     invalidOutputError: 'Specify an output path with a .svg extension.',
+    sameInputOutputError: 'The SVG output file must not overwrite the Mermaid-BPMN source file.',
     helpUsage: 'Usage: mermaid-bpmn-cli [options] [input]',
     helpExamples: [
         'mermaid-bpmn-cli --browser <chrome-or-chromium-path> -i process.mmd -o process.svg',

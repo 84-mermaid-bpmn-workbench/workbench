@@ -99,4 +99,34 @@ describe('[unit] CLIArgumentsVO Test', () => {
             cliArgumentsFixture.invalidOutputPath
         ])).toThrow(cliArgumentsFixture.invalidOutputError);
     });
+
+    it('+create() [failure] #6: Should reject an explicit SVG output path that overwrites the source', () => {
+        expect(() => CLIArgumentsVO.create([
+            '--browser',
+            cliArgumentsFixture.browserExecutablePath,
+            '--input',
+            cliArgumentsFixture.svgInputPath,
+            '--output',
+            cliArgumentsFixture.svgInputPath
+        ])).toThrow(cliArgumentsFixture.sameInputOutputError);
+    });
+
+    it('+create() [failure] #7: Should reject a derived SVG output path that overwrites the source', () => {
+        expect(() => CLIArgumentsVO.create([
+            '--browser',
+            cliArgumentsFixture.browserExecutablePath,
+            cliArgumentsFixture.svgInputPath
+        ])).toThrow(cliArgumentsFixture.sameInputOutputError);
+    });
+
+    it('+create() [failure] #8: Should reject equivalent input and output paths', () => {
+        expect(() => CLIArgumentsVO.create([
+            '--browser',
+            cliArgumentsFixture.browserExecutablePath,
+            '--input',
+            cliArgumentsFixture.equivalentSVGInputPath,
+            '--output',
+            cliArgumentsFixture.svgInputPath
+        ])).toThrow(cliArgumentsFixture.sameInputOutputError);
+    });
 });
