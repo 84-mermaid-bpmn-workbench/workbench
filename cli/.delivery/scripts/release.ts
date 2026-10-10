@@ -24,7 +24,7 @@ const program = new Command()
 
 program
     .command('prepare')
-    .description('Create, verify, and push a CLI release branch.')
+    .description('Create, verify, commit, and push a CLI release branch.')
     .action(async () => await prepareRelease());
 
 try {
@@ -43,7 +43,7 @@ async function prepareRelease(): Promise<void> {
     const releaseBranch = `release/cli/${version}`;
 
     await checkoutReleaseBranch(releaseBranch);
-    await ensurePackageVersions(version);
+    await updatePackageVersions(version);
     const preparationID = `${Date.now()}-${process.hrtime.bigint()}`;
     await writeVerification({
         prepare: { version, preparationID, preparedAt: new Date().toISOString() },
@@ -75,6 +75,8 @@ async function prepareRelease(): Promise<void> {
         return;
     }
 
+    await runCommand('git', ['add', '--', 'cli/package.json', 'cli/package-lock.json'], workbenchRoot);
+    await runCommand('git', ['commit', '--message', `release(cli): ${version}`], workbenchRoot);
     await runCommand('git', ['push', '--set-upstream', 'origin', releaseBranch], workbenchRoot);
     console.log(`Release branch ${releaseBranch} was pushed. GitHub Actions will verify it and open a pull request to master.`);
 }
@@ -85,15 +87,16 @@ async function getLatestReleaseTag(): Promise<string | null> {
 }
 
 async function determineVersion(latestReleaseTag: string | null): Promise<string> {
-    if (latestReleaseTag === null) {
-        return '0.1.0';
-    }
-
-    const commits = await execFile('git', ['log', '--format=%h %s', '-10', `${latestReleaseTag}..master`], { cwd: workbenchRoot });
-    console.log(`Commits since ${latestReleaseTag}:`);
+    const baselineVersion = latestReleaseTag?.slice(releaseTagPrefix.length) ?? '0.0.0';
+    const commitsArguments = latestReleaseTag === null
+        ? ['log', '--format=%h %s', '-10', 'master']
+        : ['log', '--format=%h %s', '-10', `${latestReleaseTag}..master`];
+    const commits = await execFile('git', commitsArguments, { cwd: workbenchRoot });
+    const baseline = latestReleaseTag ?? `the initial ${baselineVersion} baseline`;
+    console.log(`Commits since ${baseline}:`);
     console.log(commits.stdout.trim() || '(none)');
     const increment = await askForIncrement();
-    return incrementVersion(latestReleaseTag.slice(releaseTagPrefix.length), increment);
+    return incrementVersion(baselineVersion, increment);
 }
 
 async function askForIncrement(): Promise<'major' | 'minor' | 'patch'> {
@@ -142,15 +145,14 @@ async function localBranchExists(branch: string): Promise<boolean> {
     }
 }
 
-async function ensurePackageVersions(version: string): Promise<void> {
+async function updatePackageVersions(version: string): Promise<void> {
     const packageJSON = JSON.parse(await readFile(packagePath, 'utf8')) as { version: string };
     const packageLockJSON = JSON.parse(await readFile(packageLockPath, 'utf8')) as { version: string; packages: Record<string, { version?: string }> };
-    const isPackageVersionCorrect = packageJSON.version === version;
-    const isPackageLockVersionCorrect = packageLockJSON.version === version && packageLockJSON.packages[''].version === version;
-
-    if (!isPackageVersionCorrect || !isPackageLockVersionCorrect) {
-        throw new Error(`Commit version ${version} to cli/package.json and cli/package-lock.json on master before preparing the release.`);
-    }
+    packageJSON.version = version;
+    packageLockJSON.version = version;
+    packageLockJSON.packages[''].version = version;
+    await writeFile(packagePath, `${JSON.stringify(packageJSON, null, 4)}\n`);
+    await writeFile(packageLockPath, `${JSON.stringify(packageLockJSON, null, 4)}\n`);
 }
 
 async function ensureCLIChangesSinceLatestRelease(latestReleaseTag: string | null): Promise<void> {
@@ -168,7 +170,7 @@ async function ensureCLIChangesSinceLatestRelease(latestReleaseTag: string | nul
 async function confirmRelease(): Promise<boolean> {
     const interaction = createInterface({ input: stdin, output: stdout });
     try {
-        const answer = await interaction.question('Release is ready to push. Type A to accept or C to cancel: ');
+        const answer = await interaction.question('Release is ready to commit and push. Type A to accept or C to cancel: ');
         return answer.trim().toUpperCase() === 'A';
     } finally {
         interaction.close();

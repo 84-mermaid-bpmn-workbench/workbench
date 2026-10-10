@@ -104,13 +104,13 @@ $env:MERMAID_BPMN_CLI_BROWSER_PATH = 'C:\Program Files\Google\Chrome\Application
 npm run release:prepare
 ```
 
-Commit the intended release version to `cli/package.json` and `cli/package-lock.json` on `master` before preparing the release. The first release uses `0.1.0`. Later releases show the last ten commit messages since the latest `cli/v*` tag and ask whether to increment the major, minor, or patch version; the selected version must match the committed manifest version. The command creates `release/cli/<VERSION>` from `master`, runs the full release check, then asks you to accept or cancel. Accepting pushes that unchanged release branch.
+The command shows up to ten commit messages since the latest `cli/v*` tag and asks whether to increment the major, minor, or patch version. For the first release, it uses `0.0.0` as the baseline, so selecting `patch` produces `0.0.1`. The command creates `release/cli/<VERSION>` from `master`, updates the package manifests with the selected version, and runs the full release check. It then asks you to accept or cancel. Accepting commits only the version-manifest changes as `release(cli): <VERSION>` and pushes the release branch.
 
 GitHub Actions verifies the pushed release branch and opens a pull request to `master`. After the maintainer merges that pull request, Actions verifies the exact merge commit again, publishes the package, creates the matching `cli/v<VERSION>` tag, and creates a GitHub release. Pull the merged `master` branch and tags locally afterwards.
 
 #### Initial Publication
 
-npm requires the package to exist before it can be configured as a trusted publisher. The initial `0.1.0` publication therefore uses a temporary granular write token stored as the `NPM_TOKEN` GitHub Actions secret. After that publication, configure `.github/workflows/cli-release.yml` as the package's npm trusted publisher and remove `NPM_TOKEN`; later releases then use GitHub Actions OIDC.
+npm requires the package to exist before it can be configured as a trusted publisher. The initial publication therefore uses a temporary granular write token stored as the `NPM_TOKEN` GitHub Actions secret. After that publication, configure `.github/workflows/cli-release.yml` as the package's npm trusted publisher and remove `NPM_TOKEN`; later releases then use GitHub Actions OIDC.
 
 > [!NOTE]
 > Stage-only tokens cannot publish new package versions directly. Versions must be staged with `npm stage publish` and then promoted by a maintainer with two-factor authentication (2FA) enabled. This token can still deprecate versions and move dist-tags.
