@@ -1,27 +1,24 @@
 # Mermaid-BPMN CLI
 
-Render a Mermaid-BPMN diagram into an SVG file on your own machine.
-
-The package renders through a locally installed Chrome or Chromium browser. It does not download a browser, guess where one is installed, or send your diagram to a service.
+Render a Mermaid-BPMN diagram into an SVG file on your own machine through a locally installed Chrome or Chromium browser.
 
 ## Quick Start
 
-Run the package without installing it globally:
+The package requires Node.js 22.12 or later and a local Chrome or Chromium executable.
+
+Run:
 
 ```sh
+or npm install -g mermaid-bpmn-cli
+# or
+npm install --save-dev mermaid-bpmn-cli
+# then
 npx mermaid-bpmn-cli --browser /path/to/chrome process.mmd
 ```
 
 That reads `process.mmd` and writes `process.svg` next to it.
 
-To keep the command in a development project instead:
-
-```sh
-npm install --save-dev mermaid-bpmn-cli
-npx mermaid-bpmn-cli --browser /path/to/chrome process.mmd
-```
-
-The package requires Node.js 22.12 or later and a local Chrome or Chromium executable.
+Run `mermaid-bpmn-cli --help` to see the complete command help.
 
 ## Browser Configuration
 
@@ -57,8 +54,6 @@ mermaid-bpmn-cli --browser /path/to/chrome --input process.mmd --output diagrams
 
 The CLI refuses an output path that would overwrite the source file. It reads and writes UTF-8 text and produces SVG only.
 
-Run `mermaid-bpmn-cli --help` to see the complete command help.
-
 ## Programmatic API
 
 The package also exports a function for tools that need SVG markup rather than a file:
@@ -67,7 +62,7 @@ The package also exports a function for tools that need SVG markup rather than a
 import { renderSvg } from 'mermaid-bpmn-cli';
 
 const svg = await renderSvg('bpmn\n  startEvent', {
-    browserPath: '/path/to/chrome'
+ browserPath: '/path/to/chrome'
 });
 ```
 
@@ -75,7 +70,7 @@ const svg = await renderSvg('bpmn\n  startEvent', {
 
 ## Local Icon Packs
 
-Mermaid-BPMN diagrams can use the bundled `icon:` packs: Lucide, Nonicons, Devicon Plain, Font Awesome Regular, Font Awesome Brands, and Material Design Icons. Their data is packaged with this CLI and loaded from local assets; rendering does not fetch icon data from a CDN.
+Mermaid-BPMN diagrams can use the bundled `icon:` packs: [Lucide](https://lucide.dev/), [Nonicons](https://icon-sets.iconify.design/nonicons/), [Devicon Plain](https://devicon.dev/), [Font Awesome Regular](https://fontawesome.com/), [Font Awesome Brands](https://fontawesome.com/), and [Material Design Icons](https://pictogrammers.com/library/mdi/). Their data is packaged with this CLI and loaded from local assets; rendering does not fetch icon data from a CDN.
 
 ## Development
 
