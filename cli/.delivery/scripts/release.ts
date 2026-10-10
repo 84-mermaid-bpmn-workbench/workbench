@@ -102,12 +102,19 @@ async function determineVersion(latestReleaseTag: string | null): Promise<string
 async function askForIncrement(): Promise<'major' | 'minor' | 'patch'> {
     const interaction = createInterface({ input: stdin, output: stdout });
     try {
-        const answer = (await interaction.question('Select SemVer increment (major, minor, or patch): ')).trim().toLowerCase();
-        if (answer === 'major' || answer === 'minor' || answer === 'patch') {
-            return answer;
+        const answer = (await interaction.question('Select SemVer increment: [1] Patch, [5] Minor, [9] Major: ')).trim();
+        const incrementBySelection = {
+            '1': 'patch',
+            '5': 'minor',
+            '9': 'major',
+        } as const;
+        const increment = incrementBySelection[answer as keyof typeof incrementBySelection];
+
+        if (increment !== undefined) {
+            return increment;
         }
 
-        throw new Error('Release increment must be major, minor, or patch.');
+        throw new Error('Release increment must be 1 for patch, 5 for minor, or 9 for major.');
     } finally {
         interaction.close();
     }
