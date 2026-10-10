@@ -88,7 +88,7 @@ async function getLatestReleaseTag(): Promise<string | null> {
 
 async function determineVersion(latestReleaseTag: string | null): Promise<string> {
     if (latestReleaseTag === null) {
-        return '1.0.0';
+        return '0.1.0';
     }
 
     const commits = await execFile('git', ['log', '--format=%h %s', '-10', `${latestReleaseTag}..master`], { cwd: workbenchRoot });

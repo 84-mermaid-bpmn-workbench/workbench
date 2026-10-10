@@ -104,13 +104,13 @@ $env:MERMAID_BPMN_CLI_BROWSER_PATH = 'C:\Program Files\Google\Chrome\Application
 npm run release:prepare
 ```
 
-The first release uses `1.0.0`. Later releases show the last ten commit messages since the latest `cli/v*` tag and ask whether to increment the major, minor, or patch version. The command creates `release/cli/<VERSION>`, runs the full release check, then asks you to accept or cancel. Accepting stages the workbench changes, creates `release(cli): <VERSION>`, and pushes the release branch.
+The first release uses `0.1.0`. Later releases show the last ten commit messages since the latest `cli/v*` tag and ask whether to increment the major, minor, or patch version. The command creates `release/cli/<VERSION>`, runs the full release check, then asks you to accept or cancel. Accepting stages the workbench changes, creates `release(cli): <VERSION>`, and pushes the release branch.
 
 GitHub Actions verifies the pushed release branch and opens a pull request to `master`. After the maintainer merges that pull request, Actions verifies the exact merge commit again, publishes the package, creates the matching `cli/v<VERSION>` tag, and creates a GitHub release. Pull the merged `master` branch and tags locally afterwards.
 
 #### Initial Publication
 
-npm requires the package to exist before it can be configured as a trusted publisher. The initial `1.0.0` publication therefore uses a temporary granular write token stored as the `NPM_TOKEN` GitHub Actions secret. After that publication, configure `.github/workflows/cli-release.yml` as the package's npm trusted publisher and remove `NPM_TOKEN`; later releases then use GitHub Actions OIDC.
+npm requires the package to exist before it can be configured as a trusted publisher. The initial `0.1.0` publication therefore uses a temporary granular write token stored as the `NPM_TOKEN` GitHub Actions secret. After that publication, configure `.github/workflows/cli-release.yml` as the package's npm trusted publisher and remove `NPM_TOKEN`; later releases then use GitHub Actions OIDC.
 
 > [!NOTE]
 > Stage-only tokens cannot publish new package versions directly. Versions must be staged with `npm stage publish` and then promoted by a maintainer with two-factor authentication (2FA) enabled. This token can still deprecate versions and move dist-tags.
