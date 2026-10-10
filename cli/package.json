@@ -29,7 +29,8 @@
         "node": ">=22.12.0"
     },
     "files": [
-        ".delivery/.builds/dist"
+        ".delivery/.builds/dist",
+        "THIRD-PARTY-NOTICES.md"
     ],
     "dependencies": {
         "@iconify-json/devicon-plain": "1.2.61",
