@@ -19,6 +19,7 @@ LABEL org.opencontainers.image.title="mermaid-bpmn-workbench-web-editor" \
       org.opencontainers.image.revision="${WEB_EDITOR_REVISION}" \
       org.opencontainers.image.version="${WEB_EDITOR_VERSION}" \
       org.opencontainers.image.documentation="https://github.com/84-mermaid-bpmn-workbench/workbench/blob/${WEB_EDITOR_REVISION}/web-editor/Dockerfile" \
+      com.docker.image.source.entrypoint="web-editor/Dockerfile" \
       org.opencontainers.image.licenses="MIT"
 
 COPY workbench/web-editor/nginx.conf /etc/nginx/conf.d/default.conf

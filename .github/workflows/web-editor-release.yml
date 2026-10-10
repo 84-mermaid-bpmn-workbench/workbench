@@ -85,12 +85,15 @@ jobs:
                       org.opencontainers.image.revision=${{ github.sha }}
                       org.opencontainers.image.version=${{ steps.release.outputs.version }}
                       org.opencontainers.image.documentation=https://github.com/84-mermaid-bpmn-workbench/workbench/blob/${{ github.sha }}/web-editor/Dockerfile
+                      com.docker.image.source.entrypoint=web-editor/Dockerfile
 
             - name: Set up Docker Buildx
               uses: docker/setup-buildx-action@v4
 
             - name: Publish tested image with provenance
               uses: docker/build-push-action@v7
+              env:
+                  BUILDX_GIT_LABELS: full
               with:
                   context: delivery
                   file: delivery/workbench/web-editor/Dockerfile

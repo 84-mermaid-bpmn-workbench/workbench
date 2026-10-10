@@ -4,7 +4,7 @@
 
 ## Workbench elements
 
-- **Self-hosted live editor** — a production Docker deployment of the upstream editor. It provides 30% and 50% source-pane presets, keeps long source lines unwrapped with horizontal scrolling, and can open the current rendered SVG in a separate browser tab.
+- [published](https://hub.docker.com/repository/docker/valentineshidev/mermaid-bpmn-workbench-web-editor/general) **Self-hosted live editor**: a production Docker deployment of the upstream editor with developer experience improvements. It provides 30% and 50% source-pane presets, keeps long source lines unwrapped with horizontal scrolling, and can open the current rendered SVG in a separate browser tab.
 - **CLI** — a planned `mermaid-bpmn-cli` npm package and separate Docker delivery that render Mermaid-BPMN source to SVG. The npm package uses a locally managed compatible Chrome or Chromium browser; the Docker image includes its tested browser and fonts.
 - **VS Code extension** — a planned VSIX that provides local Mermaid-BPMN preview and SVG generation through the CLI's programmatic renderer.
 - **Documentation and distribution** — planned public documentation for the editor, CLI, extension, and published artifacts.
