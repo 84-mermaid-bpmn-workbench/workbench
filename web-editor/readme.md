@@ -1,6 +1,10 @@
 # Self-Hosted Mermaid BPMN Markdown Editor
 
-The package is the part of a compact [Mermaid BPMN Workbench](../readme.md) for product owners and architects that includes the [CLI](../cli/README.md) package to generate svg images from the Mermaid BPMN DSL.
+The package provides [the Docker image ](https://hub.docker.com/repository/docker/valentineshidev/mermaid-bpmn-workbench-web-editor/)to run the [editor]() as a self-hosted service.
+
+is the part of a compact [Mermaid BPMN Workbench](../readme.md) for product owners and architects that also includes the [CLI](../cli/README.md) package to generate svg images from the Mermaid BPMN DSL.
+
+See the intended workflow in the workbench [readme](../readme.md#intended-workflow)
 
 ## Development
 
