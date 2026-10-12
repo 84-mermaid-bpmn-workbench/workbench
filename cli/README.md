@@ -2,6 +2,8 @@
 
 Render a Mermaid-BPMN diagram into an SVG file on your own machine through a locally installed Chrome or Chromium browser.
 
+Also see the package companion, a self-hosted Mermaid BPMN web editor ([source](../web-editor), [Docker Hub](https://hub.docker.com/repository/docker/valentineshidev/mermaid-bpmn-workbench-web-editor))
+
 ## Quick Start
 
 The package requires Node.js 22.12 or later and a local Chrome or Chromium executable.
