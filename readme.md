@@ -5,11 +5,11 @@
 ## Intended Workflow
 
 ```text
-local Mermaid-BPMN source
+local Mermaid-BPMN DSL source code
         |
         +--> self-hosted live editor
-        |      +--> Write the DSL code
-        |      +--> Open SVG in a separate tab
+        |      +--> Add the code
+        |      +--> Open SVG in a separate tab or download it
         |
         +--> mermaid-bpmn-cli --> SVG
         |

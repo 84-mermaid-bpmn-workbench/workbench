@@ -1,6 +1,6 @@
 # Deploy the Web Editor on a VPS
 
-This example runs the published Mermaid BPMN Web Editor image on a VPS with Docker Compose. It starts two containers: the editor is available only to the Compose network on port `8080`, and Nginx publishes the configured host port and proxies requests to the editor. The deployment files are [compose.yaml](./compose.yaml), [.env.example](./.env.example), and [nginx.conf.template](./nginx.conf.template).
+This example deploys the published Mermaid BPMN Web Editor image behind Nginx with a Let’s Encrypt certificate. [compose.yaml](./compose.yaml) defines the editor, HTTPS proxy, and certificate operations; [.env.example](./.env.example) contains the deployment settings; [nginx.conf.template](./nginx.conf.template) serves ACME challenges, redirects HTTP to HTTPS, and proxies the editor.
 
 ![Web Editor Deployment](.svg/Web%20Editor%20Deployment%20Container.svg)
 
@@ -12,9 +12,9 @@ You need a VPS that you can access with SSH, Docker Engine, and the Docker Compo
 docker compose version
 ```
 
-For the direct-access setup below, allow TCP port `80` in the VPS provider's network firewall and in the operating-system firewall, if one is enabled. Use the VPS public IP address or a DNS name that resolves to it. If you use a domain, create its DNS record before opening the editor in a browser.
+Create a DNS record for the editor domain that resolves to the VPS public IP address. Allow inbound TCP ports `80` and `443` in the VPS provider's network firewall and in the operating-system firewall. The HTTP-01 validation used here requires public access to port `80`; see [Let’s Encrypt’s challenge documentation](https://letsencrypt.org/docs/challenge-types/).
 
-## Deploy With Direct HTTP Access
+## Deploy Via SSH
 
 SSH to the VPS, clone the public `workbench` repository, and enter this example directory:
 
@@ -29,40 +29,32 @@ Create the deployment configuration from the checked-in example:
 cp .env.example .env
 ```
 
-Edit `.env` and set the published image version and port. This configuration serves the editor at the root URL of the VPS:
+In `.env`, replace the placeholder `EDITOR_DOMAIN` and `CERTBOT_EMAIL` values from [.env.example](./.env.example). The remaining settings are ready to use.
 
-```dotenv
-WEB_EDITOR_IMAGE=valentineshidev/mermaid-bpmn-workbench-web-editor
-WEB_EDITOR_TAG=latest
-NGINX_IMAGE=nginx:alpine
-NGINX_HOST_PORT=80
-EDITOR_PATH=
+Issue the certificate before starting Nginx. Nothing else may listen on port `80` while this command runs:
+
+```bash
+docker compose run --rm --service-ports certificate-issue
 ```
 
-`WEB_EDITOR_TAG=latest` selects the latest published editor image. `NGINX_HOST_PORT` is the TCP port exposed by the VPS. `EDITOR_PATH` is empty because this setup serves the editor at `/`.
-
-Start the containers:
+Start the editor and HTTPS proxy:
 
 ```bash
 docker compose up --detach
 ```
 
-Confirm that the proxy responds on the VPS:
+Confirm that HTTP redirects to HTTPS and that the HTTPS endpoint responds:
 
 ```bash
-curl --head http://127.0.0.1/
+curl --head http://YOUR_DOMAIN/
+curl --head https://YOUR_DOMAIN/
 ```
 
-Then open `http://YOUR_VPS_IP/` or `http://editor.example.com/` from your own computer. Do not use `localhost` in that browser URL: on your computer it refers to your computer, not the VPS. Verify normal navigation, the examples gallery, and **Open SVG**.
+Open `https://YOUR_DOMAIN/` from your own computer. Verify normal navigation, the examples gallery, and **Open SVG**.
 
 ## Serve the Editor Below a Path Prefix
 
-Use a path prefix when this Compose deployment owns the public port but the editor should be served below a URL such as `/editor`. Set `EDITOR_PATH` to the prefix; it must start with `/` and must not end with `/`:
-
-```dotenv
-NGINX_HOST_PORT=80
-EDITOR_PATH=/editor
-```
+Use a path prefix when the editor should be served below a URL such as `/editor`. In `.env`, set `EDITOR_PATH` to `/editor`; it must start with `/` and must not end with `/`. [nginx.conf.template](./nginx.conf.template) implements the redirect and prefix removal.
 
 Restart the containers after changing `.env`:
 
@@ -70,18 +62,18 @@ Restart the containers after changing `.env`:
 docker compose up --detach
 ```
 
-Open `http://YOUR_VPS_IP/editor/` or `http://editor.example.com/editor/`. The bundled Nginx redirects `/editor` to `/editor/`, keeps the prefix in browser URLs, and removes it before passing requests to the editor.
+Open `https://YOUR_DOMAIN/editor/`. Nginx redirects `/editor` to `/editor/`, keeps the prefix in browser URLs, and removes it before passing requests to the editor.
 
-## Use an Existing HTTPS Reverse Proxy
+## Renew the Certificate
 
-The Nginx container in this example serves HTTP only; it does not obtain or configure TLS certificates. If your VPS already has a TLS-terminating reverse proxy on the same host, bind this Compose deployment to an unused loopback port instead of port `80`, for example:
+Run the certificate-renewal service periodically, then restart Nginx so it loads a renewed certificate:
 
-```dotenv
-NGINX_HOST_PORT=127.0.0.1:8080
-EDITOR_PATH=/editor
+```bash
+docker compose run --rm certificate-renew
+docker compose restart nginx
 ```
 
-Configure the existing reverse proxy to forward `/editor` and `/editor/` to `http://127.0.0.1:8080` without removing `/editor`. The proxy must preserve the request path so that the bundled Nginx can apply the configured `EDITOR_PATH`. Configure TLS certificates and the domain on that existing proxy, then open `https://editor.example.com/editor/`.
+Schedule those commands on the VPS before the certificate expires. Certbot explains its renewal behavior in [its documentation](https://eff-certbot.readthedocs.io/en/stable/using.html#renewing-certificates).
 
 ## Update or Stop the Deployment
 

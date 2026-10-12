@@ -6,7 +6,7 @@ It is the part of a compact [Mermaid BPMN Workbench](../readme.md) for product o
 
 See the intended workflow in the workbench [readme](../readme.md#intended-workflow)
 
-See the example Docker Compose configuration [here](./examples/readme.md)
+See the example Docker Compose configuration [here](./examples)
 
 ## Development
 

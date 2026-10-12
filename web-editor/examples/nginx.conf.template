@@ -1,6 +1,22 @@
 server {
     listen 80;
-    server_name _;
+    server_name ${EDITOR_DOMAIN};
+
+    location ^~ /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        return 308 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl;
+    server_name ${EDITOR_DOMAIN};
+
+    ssl_certificate /etc/letsencrypt/live/${EDITOR_DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${EDITOR_DOMAIN}/privkey.pem;
 
     set $editor_path "${EDITOR_PATH}";
     set $is_editor_path 0;

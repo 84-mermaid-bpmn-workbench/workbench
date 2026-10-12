@@ -11,8 +11,47 @@ services:
       - web-editor
     restart: unless-stopped
     ports:
-      - "${NGINX_HOST_PORT:?Set NGINX_HOST_PORT in .env}:80"
+      - "${HTTP_HOST_PORT:?Set HTTP_HOST_PORT in .env}:80"
+      - "${HTTPS_HOST_PORT:?Set HTTPS_HOST_PORT in .env}:443"
     environment:
       EDITOR_PATH: ${EDITOR_PATH:-}
+      EDITOR_DOMAIN: ${EDITOR_DOMAIN:?Set EDITOR_DOMAIN in .env}
     volumes:
       - ./nginx.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - letsencrypt:/etc/letsencrypt:ro
+      - acme-challenge:/var/www/certbot:ro
+
+  certificate-issue:
+    image: ${CERTBOT_IMAGE:?Set CERTBOT_IMAGE in .env}
+    profiles:
+      - certificate
+    ports:
+      - "${HTTP_HOST_PORT:?Set HTTP_HOST_PORT in .env}:80"
+    command:
+      - certonly
+      - --standalone
+      - --non-interactive
+      - --agree-tos
+      - --email
+      - ${CERTBOT_EMAIL:?Set CERTBOT_EMAIL in .env}
+      - --domain
+      - ${EDITOR_DOMAIN:?Set EDITOR_DOMAIN in .env}
+    volumes:
+      - letsencrypt:/etc/letsencrypt
+
+  certificate-renew:
+    image: ${CERTBOT_IMAGE:?Set CERTBOT_IMAGE in .env}
+    profiles:
+      - certificate
+    command:
+      - renew
+      - --webroot
+      - --webroot-path
+      - /var/www/certbot
+    volumes:
+      - letsencrypt:/etc/letsencrypt
+      - acme-challenge:/var/www/certbot
+
+volumes:
+  letsencrypt:
+  acme-challenge:
