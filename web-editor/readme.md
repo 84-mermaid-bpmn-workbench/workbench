@@ -1,4 +1,4 @@
-# Self-Hosted Mermaid BPMN Markdown Editor
+# Self-Hosted Mermaid BPMN Editor
 
 The package provides [the Docker image ](https://hub.docker.com/repository/docker/valentineshidev/mermaid-bpmn-workbench-web-editor/) to run the [editor](https://derari.github.io/mermaid-bpmn/editor) as a self-hosted service.
 
