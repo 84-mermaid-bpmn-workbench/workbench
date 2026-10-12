@@ -1,0 +1,18 @@
+services:
+  web-editor:
+    image: ${WEB_EDITOR_IMAGE:?Set WEB_EDITOR_IMAGE in .env}:${WEB_EDITOR_TAG:?Set WEB_EDITOR_TAG in .env}
+    restart: unless-stopped
+    expose:
+      - "8080"
+
+  nginx:
+    image: ${NGINX_IMAGE:?Set NGINX_IMAGE in .env}
+    depends_on:
+      - web-editor
+    restart: unless-stopped
+    ports:
+      - "${NGINX_HOST_PORT:?Set NGINX_HOST_PORT in .env}:80"
+    environment:
+      EDITOR_PATH: ${EDITOR_PATH:-}
+    volumes:
+      - ./nginx.conf.template:/etc/nginx/templates/default.conf.template:ro

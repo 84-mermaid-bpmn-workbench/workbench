@@ -1,0 +1,31 @@
+@startuml Web Editor Deployment Container
+!NEW_C4_STYLE=1
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title Web Editor Deployment Container
+
+LAYOUT_TOP_DOWN()
+SHOW_PERSON_OUTLINE()
+
+Person(browser, "Browser", "Uses the Mermaid BPMN Editor")
+
+System_Boundary(deployment, "Docker Compose deployment") {
+    Container(environment, ".env", "Compose environment file", "Sets the editor image, host port, and editor path")
+    Container(nginx, "Nginx", "Nginx", "Publishes port 80, redirects the bare configured prefix, and proxies requests to the editor")
+    Container(editor, "Mermaid BPMN Editor", "Docker image", "Serves the editor on port 8080")
+}
+
+note right of environment
+Root deployment:
+EDITOR_PATH=
+
+Path-prefix deployment:
+EDITOR_PATH=/example-prefix
+end note
+
+Rel(browser, nginx, "Uses the configured editor URL", "HTTP")
+Rel(environment, nginx, "Sets EDITOR_PATH")
+Rel(nginx, editor, "Strips the configured prefix and proxies /", "HTTP")
+
+@enduml
