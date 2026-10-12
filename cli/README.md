@@ -2,9 +2,7 @@
 
 Render a Mermaid-BPMN diagram into an SVG file on your own machine through a locally installed Chrome or Chromium browser.
 
-Also see the package companion, a self-hosted Mermaid BPMN web editor ([source](../web-editor), [Docker Hub](https://hub.docker.com/repository/docker/valentineshidev/mermaid-bpmn-workbench-web-editor))
-
-<a href="https://hub.docker.com/repository/docker/valentineshidev/mermaid-bpmn-workbench-web-editor" target="_blank">Link Text</a>
+The package is the part of a compact [Mermaid BPMN Workbench](../readme.md) for product owners and architects that includes a self-hosted Mermaid BPMN web editor ([source](../web-editor), [Docker Hub](https://hub.docker.com/repository/docker/valentineshidev/mermaid-bpmn-workbench-web-editor)) and VS Code extension (still to be implemented).
 
 ## Quick Start
 
