@@ -6,7 +6,7 @@ RUN npm ci
 
 COPY _mermaid-bpmn-fork/ ./
 COPY workbench/web-editor/prepare-site.mjs /prepare-site.mjs
-RUN npm run build:examples -- --base=/ --outDir=/build \
+RUN npm run build:examples -- --base=./ --outDir=/build \
     && node /prepare-site.mjs
 
 FROM nginxinc/nginx-unprivileged:alpine AS runtime

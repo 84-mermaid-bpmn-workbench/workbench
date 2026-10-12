@@ -10,6 +10,31 @@ See the intended workflow in the workbench [readme](../readme.md#intended-workfl
 
 Prerequisite: run the commands from the workspace root in an environment with Docker available.
 
+To build the image for path-prefix verification, run:
+
+```bash
+docker build --file workbench/web-editor/Dockerfile --tag mermaid-bpmn-web-editor:prefix-check --build-arg WEB_EDITOR_VERSION=prefix-check --build-arg WEB_EDITOR_REVISION=working-tree .
+```
+
+### Verify a path-prefix deployment locally
+
+Start the built `mermaid-bpmn-web-editor:prefix-check` image behind a local Nginx proxy that strips `/test-prefix`:
+
+```powershell
+docker network create web-editor-prefix-check
+docker run --detach --name web-editor-prefix-check --network web-editor-prefix-check mermaid-bpmn-web-editor:prefix-check
+docker run --detach --name web-editor-prefix-proxy --network web-editor-prefix-check --publish 8081:80 --entrypoint /bin/sh nginx:alpine -c 'printf "%s\n" "server { listen 80; location /test-prefix/ { proxy_pass http://web-editor-prefix-check:8080/; } }" > /etc/nginx/conf.d/default.conf && nginx -g "daemon off;"'
+```
+
+Open <http://localhost:8081/test-prefix/>. Verify that gallery navigation remains under `/test-prefix/examples/` and that **Open SVG** opens an SVG under `/test-prefix/svg/`.
+
+Remove the local verification containers and network when finished:
+
+```powershell
+docker rm --force web-editor-prefix-proxy web-editor-prefix-check
+docker network rm web-editor-prefix-check
+```
+
 To buld and start the image locally, run the script:
 
 ```bash
