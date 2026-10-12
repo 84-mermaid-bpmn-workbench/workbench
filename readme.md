@@ -24,4 +24,4 @@ local Mermaid-BPMN DSL source code
 
 ## The Repository Organization
 
-The repository is simple monorepo with independently developed and published packages. See the web editor source in [web-editor](./web-editor) folde and the CLI in [cli](./cli) folder.
+The repository is simple monorepo with independently developed and published packages. See the web editor source in [web-editor](./web-editor) folder and the CLI in [cli](./cli) folder.
