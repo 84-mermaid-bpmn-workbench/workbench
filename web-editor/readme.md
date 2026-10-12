@@ -4,9 +4,9 @@ The package provides [the Docker image ](https://hub.docker.com/repository/docke
 
 It is the part of a compact [Mermaid BPMN Workbench](../readme.md) for product owners and architects that also includes the [CLI](../cli/README.md) package to generate svg images from the Mermaid BPMN DSL.
 
-See the intended workflow in the workbench [readme](../readme.md#intended-workflow)
+See the intended workflow in the workbench [readme](../readme.md#intended-workflow).
 
-See the example Docker Compose configuration [here](./examples)
+See the self-hosted how-to [here](./examples).
 
 ## Development
 
